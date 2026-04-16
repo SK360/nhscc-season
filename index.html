@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -17,7 +18,9 @@
   <div id="root"></div>
 
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 
   <script type="text/babel" data-type="module">
@@ -27,8 +30,8 @@
 // ─── DATA ────────────────────────────────────────────────────────────────────
 
 const EVENTS = [
-  { id:1, name:"The Colbert Course", subtitle:"Points 1", date:"Mar 29", drivers:113, runs:715, ftdDriver:"Eric Coffman", ftdTime:20.473, avgTime:23.445, cleanRate:84.8, pylons:48, dnf:23 },
-  { id:2, name:"Baker's Dozen", subtitle:"Points 2", date:"Apr 12", drivers:133, runs:785, ftdDriver:"Eric Coffman", ftdTime:27.047, avgTime:30.468, cleanRate:90.5, pylons:60, dnf:1 },
+  { id:1, name:"The Colbert Course", subtitle:"Points 1", date:"Mar 29", drivers:113, runs:715, ftdDriver:"Eric Coffman", ftdTime:20.473, avgTime:23.445, cleanRate:84.8, pylons:48, dnf:23, oc:37, ocPct:5.2 },
+  { id:2, name:"Baker's Dozen", subtitle:"Points 2", date:"Apr 12", drivers:133, runs:785, ftdDriver:"Eric Coffman", ftdTime:27.047, avgTime:30.468, cleanRate:90.5, pylons:60, dnf:1, oc:17, ocPct:2.2 },
 ];
 
 const E1_PAX_TOP = [
@@ -249,6 +252,7 @@ function SeasonOverview() {
             <StatBox label="Runs" value={ev.runs} />
             <StatBox label="Clean %" value={`${ev.cleanRate}%`} />
             <StatBox label="Pylons" value={ev.pylons} />
+            <StatBox label="Off Course" value={ev.oc} />
           </div>
           <div style={{marginTop:12,padding:"8px 12px",background:t.accentBgSoft,borderRadius:8,
             fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.accent}}>
@@ -423,9 +427,9 @@ function CategoryBreakdown() {
           return (
             <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2,minWidth:0}}>
               <div style={{display:"flex",gap:2,alignItems:"flex-end",width:"100%",justifyContent:"center",height:180}}>
-                <div style={{width:"40%",maxWidth:18,height:h1,background:t.blue,borderRadius:"3px 3px 0 0",opacity:0.7,transition:"height 0.3s",position:"relative"}}
+                <div style={{width:"40%",maxWidth:24,height:h1,background:t.blue,borderRadius:"3px 3px 0 0",opacity:0.7,transition:"height 0.3s",position:"relative"}}
                   title={d.full + " Pts 1: " + d.e1} />
-                <div style={{width:"40%",maxWidth:18,height:h2,background:t.accent,borderRadius:"3px 3px 0 0",transition:"height 0.3s"}}
+                <div style={{width:"40%",maxWidth:24,height:h2,background:t.accent,borderRadius:"3px 3px 0 0",transition:"height 0.3s"}}
                   title={d.full + " Pts 2: " + d.e2} />
               </div>
               <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:9,color:t.textMuted,
@@ -454,6 +458,7 @@ function EventComparison() {
     { label:"Total Runs", e1:715, e2:785 },
     { label:"Clean Rate %", e1:84.8, e2:90.5 },
     { label:"Pylons Hit", e1:48, e2:60 },
+    { label:"Off Course", e1:37, e2:17 },
     { label:"DNFs", e1:23, e2:1 },
     { label:"Classes", e1:20, e2:24 },
   ];
@@ -470,7 +475,7 @@ function EventComparison() {
           const max = Math.max(m.e1,m.e2);
           const e1w = (m.e1/max)*100;
           const e2w = (m.e2/max)*100;
-          const e2better = m.label==="DNFs" ? m.e2<m.e1 : m.e2>m.e1;
+          const e2better = (m.label==="DNFs" || m.label==="Off Course") ? m.e2<m.e1 : m.e2>m.e1;
           return [
             <div key={`e1-${i}`} style={{display:"flex",alignItems:"center",gap:8,justifyContent:"flex-end",padding:"6px 0"}}>
               <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:16,
@@ -621,7 +626,7 @@ function NHSCCDashboard() {
       <link href={FONT_URL} rel="stylesheet" />
       <div style={{
         minHeight:"100vh",background:t.bg,color:t.text,
-        fontFamily:"'Barlow',sans-serif",padding:"24px 16px",maxWidth:1100,margin:"0 auto",
+        fontFamily:"'Barlow',sans-serif",padding:"24px clamp(16px, 3vw, 48px)",maxWidth:1440,margin:"0 auto",
         transition:"background 0.3s, color 0.3s",
       }}>
         <div style={{marginBottom:28,position:"relative"}}>
@@ -681,7 +686,7 @@ function NHSCCDashboard() {
                   {[
                     {icon:"🏆",title:"Eric Coffman's FTD Streak",desc:"Back-to-back fastest time of day in the NSX. His PAX consistency across different course designs is the benchmark right now."},
                     {icon:"📈",title:"Field Growth: +18%",desc:"133 drivers at Points 2, up from 113. The season is building momentum. 59 brand-new faces showed up for the second event."},
-                    {icon:"🎯",title:"Cleaner Driving",desc:"Clean run rate jumped from 84.8% to 90.5%. DNFs plummeted from 23 to just 1. The field is dialing in."},
+                    {icon:"🎯",title:"Cleaner Driving",desc:"Clean run rate jumped from 84.8% to 90.5%. Off courses dropped from 37 to 17, DNFs from 23 to just 1. The field is dialing in."},
                     {icon:"🔄",title:"12-Way Tie at the Top",desc:"A dozen class winners sit at a perfect 20 points. The next few events will separate the contenders from the pretenders."},
                     {icon:"🆕",title:"Novice Class Shift",desc:"18 novices in Pts 1 vs only 4 in Pts 2. Several graduated to classed competition — a healthy sign of driver development."},
                     {icon:"⚡",title:"EV Category Growing",desc:"Electric Vehicle class grew from 3 to 5 entries. Robert Killmer's Tesla Midnight remains dominant with back-to-back class wins."},
@@ -716,5 +721,6 @@ function NHSCCDashboard() {
     const root = ReactDOM.createRoot(document.getElementById('root'));
     root.render(React.createElement(NHSCCDashboard));
   </script>
+
 </body>
 </html>
