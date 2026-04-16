@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NHSCC Season Dashboard — 2026</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { margin: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    button { font-family: inherit; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+  <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
+
+  <script type="text/babel" data-type="module">
+    const { useState, createContext, useContext } = React;
+
+
+// ─── DATA ────────────────────────────────────────────────────────────────────
+
+const EVENTS = [
+  { id:1, name:"The Colbert Course", subtitle:"Points 1", date:"Mar 29", drivers:113, runs:715, ftdDriver:"Eric Coffman", ftdTime:20.473, avgTime:23.445, cleanRate:84.8, pylons:48, dnf:23 },
+  { id:2, name:"Baker's Dozen", subtitle:"Points 2", date:"Apr 12", drivers:133, runs:785, ftdDriver:"Eric Coffman", ftdTime:27.047, avgTime:30.468, cleanRate:90.5, pylons:60, dnf:1 },
+];
+
+const E1_PAX_TOP = [
+  {name:"Eric Coffman",pax:17.197,cls:"SS",car:"Acura NSX"},
+  {name:"Sean ODonnell",pax:17.391,cls:"BST",car:"VW Golf R"},
+  {name:"David Schneider",pax:17.516,cls:"GS",car:"Hyundai Elantra N"},
+  {name:"Ryan Koleno",pax:17.530,cls:"CAMS",car:"Chevy Corvette"},
+  {name:"Bob Smith",pax:17.555,cls:"SB",car:"Porsche Cayman S"},
+  {name:"Chris Zavolta",pax:17.574,cls:"CAMT",car:"Chevy Camaro SS"},
+  {name:"Kevin Duque",pax:17.701,cls:"STB",car:"Subaru WRX"},
+  {name:"Robert Killmer",pax:17.721,cls:"EVX",car:"Tesla Midnight"},
+  {name:"Albert Wurst",pax:17.768,cls:"CAMS",car:"Chevy Corvette"},
+  {name:"Justin LaBarge",pax:17.775,cls:"DS",car:"VW Golf R"},
+];
+const E2_PAX_TOP = [
+  {name:"Chad Englert",pax:22.344,cls:"SB",car:"Chevy Camaro"},
+  {name:"Randy Pearson",pax:22.655,cls:"DS",car:"Honda Civic Type R"},
+  {name:"Eric Coffman",pax:22.719,cls:"SS",car:"Acura NSX"},
+  {name:"Steven Matchett",pax:22.812,cls:"CS",car:"Mazda MX-5"},
+  {name:"David Schneider",pax:22.849,cls:"GS",car:"Hyundai Elantra N"},
+  {name:"Jake Glover",pax:22.879,cls:"STB",car:"Toyota GR86"},
+  {name:"Ryan Koleno",pax:22.911,cls:"CAMS",car:"Chevy Corvette"},
+  {name:"Robert Killmer",pax:23.020,cls:"EVX",car:"Tesla Midnight"},
+  {name:"Chris Zavolta",pax:23.022,cls:"CAMT",car:"Chevy Camaro SS"},
+  {name:"Albert Wurst",pax:23.311,cls:"CAMS",car:"Chevy Corvette"},
+];
+
+const STANDINGS = [
+  {name:"Eric Coffman",cls:"SS",p1:10,p2:10,total:20,events:2},
+  {name:"Ryan Koleno",cls:"CAMS",p1:10,p2:10,total:20,events:2},
+  {name:"Matt Fallat",cls:"EST",p1:10,p2:10,total:20,events:2},
+  {name:"Sean ODonnell",cls:"BST",p1:10,p2:10,total:20,events:2},
+  {name:"Kevin Duque",cls:"GST",p1:10,p2:10,total:20,events:2},
+  {name:"Robert Killmer",cls:"EVX",p1:10,p2:10,total:20,events:2},
+  {name:"Chris Zavolta",cls:"CAMT",p1:10,p2:10,total:20,events:2},
+  {name:"Mark Sanner",cls:"HS",p1:10,p2:10,total:20,events:2},
+  {name:"Thomas Roberts",cls:"CAMC",p1:10,p2:10,total:20,events:2},
+  {name:"Derek McMillen",cls:"UB",p1:10,p2:10,total:20,events:2},
+  {name:"Zac Lakenan",cls:"XA",p1:10,p2:10,total:20,events:2},
+  {name:"David Schneider",cls:"GS",p1:10,p2:10,total:20,events:2},
+  {name:"Jay Gyger",cls:"HB",p1:10,p2:7,total:17,events:2},
+  {name:"Bob Smith",cls:"SB",p1:10,p2:7,total:17,events:2},
+  {name:"Roberto Redondo",cls:"BS",p1:7,p2:10,total:17,events:2},
+  {name:"David Lang",cls:"VIN",p1:10,p2:7,total:17,events:2},
+  {name:"Steve Blough",cls:"SSM",p1:10,p2:7,total:17,events:2},
+  {name:"David Stoner",cls:"SSM",p1:7,p2:10,total:17,events:2},
+  {name:"Jon Lauer",cls:"CS",p1:10,p2:5,total:15,events:2},
+  {name:"Cade Corey",cls:"UB",p1:7,p2:7,total:14,events:2},
+];
+
+const MOVERS_UP = [
+  {name:"Noah Snyder",r1:"96/113",r2:"78/133",pct:"+26%"},
+  {name:"Brian Pearson",r1:"100/113",r2:"87/133",pct:"+23%"},
+  {name:"Jimmy Craig",r1:"75/113",r2:"66/133",pct:"+17%"},
+  {name:"Brian Banas",r1:"77/113",r2:"71/133",pct:"+15%"},
+  {name:"Chad Arndt",r1:"110/113",r2:"111/133",pct:"+14%"},
+];
+const MOVERS_DOWN = [
+  {name:"Kurt Emigh",r1:"48/113",r2:"108/133",pct:"-39%"},
+  {name:"Charles Stunkard",r1:"45/113",r2:"99/133",pct:"-35%"},
+  {name:"Armand Engelbrecht",r1:"71/113",r2:"125/133",pct:"-31%"},
+  {name:"Ross Ivey",r1:"16/113",r2:"54/133",pct:"-26%"},
+  {name:"Sean Peck",r1:"14/113",r2:"47/133",pct:"-23%"},
+];
+
+const CAT_DATA_E1 = {Street:30,"Street Touring":9,"Classic American Muscle":19,"Electric Vehicle":3,"Hoosier Bump":9,Novice:18,"Street Bump":5,"Street Modified":5,"Street Touring Bump":5,Vintage:3,"Xtreme Street":7};
+const CAT_DATA_E2 = {Street:46,"Street Touring":19,"Classic American Muscle":21,"Electric Vehicle":5,"Hoosier Bump":2,Novice:4,"Street Bump":5,"Street Modified":6,"Street Touring Bump":5,Vintage:6,"Xtreme Street":6,Prepared:3,"Street Prepared":3,"Unlimited Bump":2};
+
+// ─── THEMES ─────────────────────────────────────────────────────────────────
+
+const FONT_URL = "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800;900&family=Barlow:wght@300;400;500;600&display=swap";
+
+const darkTheme = {
+  mode:"dark", bg:"#0a0e17", card:"#111827", cardBorder:"#1e293b",
+  accent:"#f59e0b", accentDim:"#b45309",
+  accentBg:"rgba(245,158,11,0.12)", accentBgSoft:"rgba(245,158,11,0.06)",
+  green:"#34d399", greenBg:"rgba(52,211,153,0.08)", greenBorder:"rgba(52,211,153,0.12)", greenBgSoft:"rgba(52,211,153,0.06)",
+  red:"#f87171", blue:"#60a5fa", blueBg:"rgba(96,165,250,0.06)",
+  purple:"#a78bfa", purpleBg:"rgba(167,139,250,0.08)",
+  text:"#f1f5f9", textDim:"#94a3b8", textMuted:"#475569",
+  stripe:"rgba(255,255,255,0.02)", subtleBg:"rgba(255,255,255,0.02)", subtleBg2:"rgba(255,255,255,0.04)",
+  tabActiveBg:"rgba(245,158,11,0.12)", gridStroke:"rgba(255,255,255,0.04)",
+  tooltipBg:"#111827", logoText:"#000", logoShadow:"0 4px 20px rgba(245,158,11,0.3)",
+  headingGradient:"linear-gradient(135deg,#f1f5f9,#94a3b8)",
+};
+
+const lightTheme = {
+  mode:"light", bg:"#f4f4f0", card:"#ffffff", cardBorder:"#ddd9d0",
+  accent:"#c2760a", accentDim:"#92400e",
+  accentBg:"rgba(194,118,10,0.1)", accentBgSoft:"rgba(194,118,10,0.05)",
+  green:"#0d7a50", greenBg:"rgba(13,122,80,0.08)", greenBorder:"rgba(13,122,80,0.15)", greenBgSoft:"rgba(13,122,80,0.05)",
+  red:"#c62828", blue:"#1e5fc2", blueBg:"rgba(30,95,194,0.06)",
+  purple:"#6a30c7", purpleBg:"rgba(106,48,199,0.06)",
+  text:"#1c1917", textDim:"#57534e", textMuted:"#a8a29e",
+  stripe:"rgba(0,0,0,0.025)", subtleBg:"rgba(0,0,0,0.02)", subtleBg2:"rgba(0,0,0,0.04)",
+  tabActiveBg:"rgba(194,118,10,0.08)", gridStroke:"rgba(0,0,0,0.07)",
+  tooltipBg:"#ffffff", logoText:"#fff", logoShadow:"0 4px 16px rgba(194,118,10,0.2)",
+  headingGradient:"linear-gradient(135deg,#1c1917,#57534e)",
+};
+
+const ThemeCtx = createContext(darkTheme);
+const useT = () => useContext(ThemeCtx);
+
+// ─── COMPONENTS ──────────────────────────────────────────────────────────────
+
+function Card({ children, style }) {
+  const t = useT();
+  return (
+    <div style={{ background:t.card, border:`1px solid ${t.cardBorder}`, borderRadius:12,
+      padding:"20px 24px", position:"relative", overflow:"hidden",
+      transition:"background 0.25s, border-color 0.25s, box-shadow 0.25s",
+      boxShadow: t.mode==="light" ? "0 1px 3px rgba(0,0,0,0.06)" : "none",
+      ...style }}>{children}</div>
+  );
+}
+
+function SectionTitle({ children, sub }) {
+  const t = useT();
+  return (
+    <div style={{marginBottom:20}}>
+      <h2 style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:22,
+        textTransform:"uppercase",letterSpacing:"0.08em",color:t.text,margin:0}}>{children}</h2>
+      {sub && <p style={{fontFamily:"'Barlow',sans-serif",fontSize:13,color:t.textDim,margin:"4px 0 0",fontWeight:400}}>{sub}</p>}
+    </div>
+  );
+}
+
+function StatBox({ label, value, accent=false }) {
+  const t = useT();
+  return (
+    <div style={{textAlign:"center",flex:1,minWidth:80}}>
+      <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,
+        fontSize:32,color:accent?t.accent:t.text,lineHeight:1}}>{value}</div>
+      <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textDim,
+        textTransform:"uppercase",letterSpacing:"0.1em",marginTop:6,fontWeight:500}}>{label}</div>
+    </div>
+  );
+}
+
+function Pill({ children, color }) {
+  const t = useT();
+  const c = color || t.accent;
+  return (
+    <span style={{display:"inline-block",padding:"2px 8px",borderRadius:4,fontSize:11,
+      fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,letterSpacing:"0.06em",
+      background:`${c}22`,color:c,textTransform:"uppercase"}}>{children}</span>
+  );
+}
+
+function TabBar({ tabs, active, onChange }) {
+  const t = useT();
+  return (
+    <div style={{display:"flex",gap:4,marginBottom:20,borderBottom:`1px solid ${t.cardBorder}`,paddingBottom:0}}>
+      {tabs.map(tb => (
+        <button key={tb.id} onClick={()=>onChange(tb.id)} style={{
+          fontFamily:"'Barlow Condensed',sans-serif",fontWeight:active===tb.id?700:500,fontSize:14,
+          textTransform:"uppercase",letterSpacing:"0.08em",padding:"8px 16px",
+          border:"none",cursor:"pointer",borderRadius:"8px 8px 0 0",transition:"all 0.15s",
+          background:active===tb.id?t.tabActiveBg:"transparent",
+          color:active===tb.id?t.accent:t.textDim,
+          borderBottom:active===tb.id?`2px solid ${t.accent}`:"2px solid transparent",
+        }}>{tb.label}</button>
+      ))}
+    </div>
+  );
+}
+
+function ThemeToggle({ isDark, onToggle }) {
+  const t = useT();
+  return (
+    <button onClick={onToggle} aria-label="Toggle theme" style={{
+      position:"absolute",top:0,right:0,
+      display:"flex",alignItems:"center",gap:8,
+      padding:"8px 14px",borderRadius:8,border:`1px solid ${t.cardBorder}`,
+      background:t.card,cursor:"pointer",transition:"all 0.2s",
+      fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,fontSize:12,
+      textTransform:"uppercase",letterSpacing:"0.08em",color:t.textDim,
+    }}>
+      <span style={{fontSize:15,lineHeight:1}}>{isDark ? "☀️" : "🌙"}</span>
+      {isDark ? "Light" : "Dark"}
+    </button>
+  );
+}
+
+// ─── PANELS ──────────────────────────────────────────────────────────────────
+
+function SeasonOverview() {
+  const t = useT();
+  const growth = ((133-113)/113*100).toFixed(0);
+  return (
+    <div style={{display:"grid",gap:16,gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))"}}>
+      <Card>
+        <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
+          <div style={{width:40,height:40,borderRadius:10,background:`linear-gradient(135deg,${t.accent},${t.accentDim})`,
+            display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,color:t.logoText,fontWeight:800}}>2</div>
+          <div>
+            <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:16,color:t.text}}>Events Complete</div>
+            <div style={{fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.textDim}}>2026 Points Series</div>
+          </div>
+        </div>
+        <div style={{display:"flex",gap:8}}>
+          <StatBox label="Unique Drivers" value="172" />
+          <StatBox label="Total Runs" value="1,500" />
+          <StatBox label="Growth" value={`+${growth}%`} accent />
+        </div>
+      </Card>
+      {EVENTS.map(ev => (
+        <Card key={ev.id}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
+            <div>
+              <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:17,color:t.text}}>{ev.name}</div>
+              <div style={{fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.textDim}}>{ev.subtitle} &middot; {ev.date}</div>
+            </div>
+            <Pill>{ev.ftdTime}s</Pill>
+          </div>
+          <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+            <StatBox label="Drivers" value={ev.drivers} />
+            <StatBox label="Runs" value={ev.runs} />
+            <StatBox label="Clean %" value={`${ev.cleanRate}%`} />
+            <StatBox label="Pylons" value={ev.pylons} />
+          </div>
+          <div style={{marginTop:12,padding:"8px 12px",background:t.accentBgSoft,borderRadius:8,
+            fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.accent}}>
+            FTD: {ev.ftdDriver} — {ev.ftdTime}s
+          </div>
+        </Card>
+      ))}
+    </div>
+  );
+}
+
+function PointsStandings() {
+  const t = useT();
+  const [showAll, setShowAll] = useState(false);
+  const data = showAll ? STANDINGS : STANDINGS.slice(0,12);
+  return (
+    <Card>
+      <SectionTitle sub="Class winners after 2 events — 12 drivers with perfect 20pts">Points Standings</SectionTitle>
+      <div style={{overflowX:"auto"}}>
+        <table style={{width:"100%",borderCollapse:"collapse",fontFamily:"'Barlow',sans-serif",fontSize:13}}>
+          <thead>
+            <tr style={{borderBottom:`1px solid ${t.cardBorder}`}}>
+              {["#","Driver","Class","Pts 1","Pts 2","Total"].map(h => (
+                <th key={h} style={{padding:"8px 10px",textAlign:h==="#"?"center":"left",
+                  fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,fontSize:11,
+                  textTransform:"uppercase",letterSpacing:"0.1em",color:t.textMuted}}>{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((d,i) => (
+              <tr key={d.name} style={{borderBottom:`1px solid ${t.cardBorder}`,background:i%2===0?"transparent":t.stripe}}>
+                <td style={{padding:"10px",textAlign:"center",fontFamily:"'Barlow Condensed',sans-serif",
+                  fontWeight:700,color:i<12?t.accent:t.textDim,fontSize:15}}>{i+1}</td>
+                <td style={{padding:"10px",color:t.text,fontWeight:500}}>{d.name}</td>
+                <td style={{padding:"10px"}}><Pill color={t.blue}>{d.cls}</Pill></td>
+                <td style={{padding:"10px",color:d.p1===10?t.green:t.textDim,fontWeight:600,
+                  fontFamily:"'Barlow Condensed',sans-serif",fontSize:15}}>{d.p1||"—"}</td>
+                <td style={{padding:"10px",color:d.p2===10?t.green:t.textDim,fontWeight:600,
+                  fontFamily:"'Barlow Condensed',sans-serif",fontSize:15}}>{d.p2||"—"}</td>
+                <td style={{padding:"10px",fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,
+                  fontSize:18,color:d.total===20?t.accent:t.text}}>{d.total}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <button onClick={()=>setShowAll(!showAll)} style={{marginTop:12,border:"none",
+        background:t.accentBg,color:t.accent,padding:"8px 16px",borderRadius:6,
+        cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,fontSize:13,
+        textTransform:"uppercase",letterSpacing:"0.06em"}}>
+        {showAll?"Show Less":"Show All 20"}
+      </button>
+    </Card>
+  );
+}
+
+function PaxLeaderboard() {
+  const t = useT();
+  const [event, setEvent] = useState(1);
+  const list = event===1 ? E1_PAX_TOP : E2_PAX_TOP;
+  const best = list[0].pax;
+  return (
+    <Card>
+      <SectionTitle sub="Indexed times level the playing field across all classes">PAX Leaderboard</SectionTitle>
+      <div style={{display:"flex",gap:6,marginBottom:16}}>
+        {[1,2].map(e => (
+          <button key={e} onClick={()=>setEvent(e)} style={{
+            padding:"6px 14px",borderRadius:6,border:"none",cursor:"pointer",
+            fontFamily:"'Barlow Condensed',sans-serif",fontWeight:event===e?700:500,fontSize:13,
+            background:event===e?t.accentBg:t.subtleBg2,
+            color:event===e?t.accent:t.textDim,textTransform:"uppercase",letterSpacing:"0.06em",
+          }}>Pts {e}</button>
+        ))}
+      </div>
+      {list.map((d,i) => {
+        const gap = d.pax - best;
+        return (
+          <div key={d.name} style={{display:"flex",alignItems:"center",gap:10,padding:"9px 0",
+            borderBottom:i<list.length-1?`1px solid ${t.cardBorder}`:"none"}}>
+            <div style={{width:28,textAlign:"center",fontFamily:"'Barlow Condensed',sans-serif",
+              fontWeight:800,fontSize:16,color:i<3?t.accent:t.textMuted}}>{i+1}</div>
+            <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
+              <div style={{flex:1,minWidth:0}}>
+                <div style={{fontFamily:"'Barlow',sans-serif",fontSize:13,color:t.text,fontWeight:500}}>{d.name}</div>
+                <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textMuted,marginTop:1}}>{d.car}</div>
+              </div>
+              <div style={{display:"flex",alignItems:"center",gap:8,flexShrink:0}}>
+                {i===0 ? (
+                  <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:11,
+                    color:t.accent,textTransform:"uppercase",letterSpacing:"0.06em"}}>Leader</span>
+                ) : (
+                  <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,fontSize:13,
+                    color:t.textDim}}>+{gap.toFixed(3)}s</span>
+                )}
+                <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:15,
+                  color:i<3?t.text:t.textDim,minWidth:62,textAlign:"right"}}>{d.pax.toFixed(3)}s</span>
+                <Pill color={i<3?t.blue:t.textMuted}>{d.cls}</Pill>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </Card>
+  );
+}
+
+function MoversShakers() {
+  const t = useT();
+  return (
+    <Card>
+      <SectionTitle sub="PAX percentile rank changes between events for returning drivers">Movers &amp; Shakers</SectionTitle>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:20}}>
+        <div>
+          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:13,
+            textTransform:"uppercase",letterSpacing:"0.1em",color:t.green,marginBottom:10,
+            display:"flex",alignItems:"center",gap:6}}>
+            <span style={{fontSize:16}}>&#9650;</span> Rising
+          </div>
+          {MOVERS_UP.map(m => (
+            <div key={m.name} style={{display:"flex",justifyContent:"space-between",alignItems:"center",
+              padding:"8px 0",borderBottom:`1px solid ${t.cardBorder}`}}>
+              <div>
+                <div style={{fontFamily:"'Barlow',sans-serif",fontSize:13,color:t.text,fontWeight:500}}>{m.name}</div>
+                <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textMuted}}>{m.r1} → {m.r2}</div>
+              </div>
+              <Pill color={t.green}>{m.pct}</Pill>
+            </div>
+          ))}
+        </div>
+        <div>
+          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:13,
+            textTransform:"uppercase",letterSpacing:"0.1em",color:t.red,marginBottom:10,
+            display:"flex",alignItems:"center",gap:6}}>
+            <span style={{fontSize:16}}>&#9660;</span> Sliding
+          </div>
+          {MOVERS_DOWN.map(m => (
+            <div key={m.name} style={{display:"flex",justifyContent:"space-between",alignItems:"center",
+              padding:"8px 0",borderBottom:`1px solid ${t.cardBorder}`}}>
+              <div>
+                <div style={{fontFamily:"'Barlow',sans-serif",fontSize:13,color:t.text,fontWeight:500}}>{m.name}</div>
+                <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textMuted}}>{m.r1} → {m.r2}</div>
+              </div>
+              <Pill color={t.red}>{m.pct}</Pill>
+            </div>
+          ))}
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function CategoryBreakdown() {
+  const t = useT();
+  const allCats = [...new Set([...Object.keys(CAT_DATA_E1), ...Object.keys(CAT_DATA_E2)])].sort();
+  const chartData = allCats.map(c => ({
+    name: c.replace("Classic American Muscle","CAM").replace("Street Touring Bump","ST Bump")
+           .replace("Street Modified","SM").replace("Electric Vehicle","EV")
+           .replace("Xtreme Street","XS").replace("Unlimited Bump","UB")
+           .replace("Street Prepared","SP").replace("Hoosier Bump","HB")
+           .replace("Street Touring","ST").replace("Street Bump","SB"),
+    e1: CAT_DATA_E1[c]||0, e2: CAT_DATA_E2[c]||0, full: c,
+  }));
+  const maxVal = Math.max(...chartData.map(d => Math.max(d.e1, d.e2)));
+  return (
+    <Card>
+      <SectionTitle sub="Driver distribution by category across events">Category Breakdown</SectionTitle>
+      <div style={{display:"flex",gap:6,alignItems:"flex-end",height:220,padding:"0 4px"}}>
+        {chartData.map((d,i) => {
+          const h1 = (d.e1/maxVal)*180;
+          const h2 = (d.e2/maxVal)*180;
+          return (
+            <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2,minWidth:0}}>
+              <div style={{display:"flex",gap:2,alignItems:"flex-end",width:"100%",justifyContent:"center",height:180}}>
+                <div style={{width:"40%",maxWidth:18,height:h1,background:t.blue,borderRadius:"3px 3px 0 0",opacity:0.7,transition:"height 0.3s",position:"relative"}}
+                  title={d.full + " Pts 1: " + d.e1} />
+                <div style={{width:"40%",maxWidth:18,height:h2,background:t.accent,borderRadius:"3px 3px 0 0",transition:"height 0.3s"}}
+                  title={d.full + " Pts 2: " + d.e2} />
+              </div>
+              <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:9,color:t.textMuted,
+                textAlign:"center",lineHeight:1.1,width:"100%",overflow:"hidden",textOverflow:"ellipsis",
+                whiteSpace:"nowrap",transform:"rotate(-40deg)",transformOrigin:"center",marginTop:4,height:30}}>{d.name}</div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{display:"flex",gap:16,justifyContent:"center",marginTop:16}}>
+        <div style={{display:"flex",alignItems:"center",gap:6,fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.textDim}}>
+          <div style={{width:12,height:12,borderRadius:2,background:t.blue,opacity:0.7}} /> Points 1
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:6,fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.textDim}}>
+          <div style={{width:12,height:12,borderRadius:2,background:t.accent}} /> Points 2
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function EventComparison() {
+  const t = useT();
+  const metrics = [
+    { label:"Drivers", e1:113, e2:133 },
+    { label:"Total Runs", e1:715, e2:785 },
+    { label:"Clean Rate %", e1:84.8, e2:90.5 },
+    { label:"Pylons Hit", e1:48, e2:60 },
+    { label:"DNFs", e1:23, e2:1 },
+    { label:"Classes", e1:20, e2:24 },
+  ];
+  return (
+    <Card>
+      <SectionTitle sub="Side-by-side event metrics">Event Comparison</SectionTitle>
+      <div style={{display:"grid",gridTemplateColumns:"1fr auto 1fr",gap:0,alignItems:"center"}}>
+        <div style={{textAlign:"center",fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,
+          fontSize:13,color:t.blue,textTransform:"uppercase",letterSpacing:"0.08em",paddingBottom:10}}>Pts 1</div>
+        <div />
+        <div style={{textAlign:"center",fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,
+          fontSize:13,color:t.accent,textTransform:"uppercase",letterSpacing:"0.08em",paddingBottom:10}}>Pts 2</div>
+        {metrics.map((m,i) => {
+          const max = Math.max(m.e1,m.e2);
+          const e1w = (m.e1/max)*100;
+          const e2w = (m.e2/max)*100;
+          const e2better = m.label==="DNFs" ? m.e2<m.e1 : m.e2>m.e1;
+          return [
+            <div key={`e1-${i}`} style={{display:"flex",alignItems:"center",gap:8,justifyContent:"flex-end",padding:"6px 0"}}>
+              <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:16,
+                color:!e2better?t.text:t.textMuted,minWidth:40,textAlign:"right"}}>{m.e1}</span>
+              <div style={{width:80,height:6,background:t.subtleBg2,borderRadius:3,overflow:"hidden",direction:"rtl"}}>
+                <div style={{width:`${e1w}%`,height:"100%",background:t.blue,borderRadius:3}} />
+              </div>
+            </div>,
+            <div key={`label-${i}`} style={{textAlign:"center",padding:"6px 12px",fontFamily:"'Barlow',sans-serif",
+              fontSize:11,color:t.textMuted,textTransform:"uppercase",letterSpacing:"0.06em",fontWeight:500,
+              whiteSpace:"nowrap"}}>{m.label}</div>,
+            <div key={`e2-${i}`} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0"}}>
+              <div style={{width:80,height:6,background:t.subtleBg2,borderRadius:3,overflow:"hidden"}}>
+                <div style={{width:`${e2w}%`,height:"100%",background:t.accent,borderRadius:3}} />
+              </div>
+              <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:16,
+                color:e2better?t.text:t.textMuted,minWidth:40}}>{m.e2}</span>
+            </div>
+          ];
+        })}
+      </div>
+    </Card>
+  );
+}
+
+function RetentionWidget() {
+  const t = useT();
+  const pct = ((74/(74+39))*100).toFixed(0);
+  return (
+    <Card>
+      <SectionTitle sub="Driver retention and new registrations between events">Participation Flow</SectionTitle>
+      <div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:24,flexWrap:"wrap",padding:"12px 0"}}>
+        <div style={{textAlign:"center"}}>
+          <div style={{width:90,height:90,borderRadius:"50%",border:`3px solid ${t.blue}`,
+            display:"flex",alignItems:"center",justifyContent:"center",background:t.blueBg}}>
+            <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:28,color:t.blue}}>113</div>
+          </div>
+          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textDim,marginTop:6}}>Pts 1</div>
+        </div>
+        <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
+          <div style={{display:"flex",alignItems:"center",gap:4}}>
+            <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:14,color:t.green}}>74</span>
+            <span style={{color:t.green,fontSize:18}}>→</span>
+          </div>
+          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:10,color:t.textMuted}}>returned</div>
+          <div style={{width:1,height:16,background:t.cardBorder}} />
+          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:10,color:t.textMuted}}>39 one-event</div>
+        </div>
+        <div style={{textAlign:"center"}}>
+          <div style={{width:100,height:100,borderRadius:"50%",border:`3px solid ${t.accent}`,
+            display:"flex",alignItems:"center",justifyContent:"center",background:t.accentBgSoft}}>
+            <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:28,color:t.accent}}>133</div>
+          </div>
+          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textDim,marginTop:6}}>Pts 2</div>
+        </div>
+      </div>
+      <div style={{display:"flex",gap:8,justifyContent:"center",marginTop:4}}>
+        <div style={{padding:"8px 14px",background:t.greenBg,borderRadius:8,textAlign:"center"}}>
+          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:20,color:t.green}}>{pct}%</div>
+          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:10,color:t.textMuted}}>Retention Rate</div>
+        </div>
+        <div style={{padding:"8px 14px",background:t.accentBg,borderRadius:8,textAlign:"center"}}>
+          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:20,color:t.accent}}>59</div>
+          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:10,color:t.textMuted}}>New in Pts 2</div>
+        </div>
+        <div style={{padding:"8px 14px",background:t.purpleBg,borderRadius:8,textAlign:"center"}}>
+          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:20,color:t.purple}}>172</div>
+          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:10,color:t.textMuted}}>Total Unique</div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function NoviceSpotlight() {
+  const t = useT();
+  const novE1 = [{name:"Jeff Ferguson",time:21.286,car:"Acura NSX",pos:1},
+    {name:"Larry Spector",time:22.732,car:"Chevy Camaro SS 1LE",pos:2},
+    {name:"Colin Longmore",time:23.075,car:"Scion FRS",pos:3}];
+  const novE2 = [{name:"Brandon Bufalini",time:30.881,car:"Ford Focus ST",pos:1},
+    {name:"Michael Bushko",time:31.124,car:"Hyundai Elantra N",pos:2},
+    {name:"Aaron Rankin",time:31.238,car:"Subaru Forester XT",pos:3}];
+  const grads = ["Noah Snyder","Chad Arndt","Devon Mcghen"];
+  return (
+    <Card>
+      <SectionTitle sub="Newcomer performance and graduates to regular classes">Novice Spotlight</SectionTitle>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
+        <div>
+          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,fontSize:12,
+            color:t.blue,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:8}}>Pts 1 — 18 novices</div>
+          {novE1.map(n => (
+            <div key={n.name} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",
+              borderBottom:`1px solid ${t.cardBorder}`}}>
+              <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:16,
+                color:n.pos===1?t.accent:t.textMuted,width:20,textAlign:"center"}}>{n.pos}</span>
+              <div style={{flex:1}}>
+                <div style={{fontFamily:"'Barlow',sans-serif",fontSize:13,color:t.text,fontWeight:500}}>{n.name}</div>
+                <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textMuted}}>{n.car} — {n.time}s</div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <div>
+          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,fontSize:12,
+            color:t.accent,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:8}}>Pts 2 — 4 novices</div>
+          {novE2.map(n => (
+            <div key={n.name} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",
+              borderBottom:`1px solid ${t.cardBorder}`}}>
+              <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:16,
+                color:n.pos===1?t.accent:t.textMuted,width:20,textAlign:"center"}}>{n.pos}</span>
+              <div style={{flex:1}}>
+                <div style={{fontFamily:"'Barlow',sans-serif",fontSize:13,color:t.text,fontWeight:500}}>{n.name}</div>
+                <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textMuted}}>{n.car} — {n.time}s</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div style={{marginTop:14,padding:"10px 14px",background:t.greenBgSoft,borderRadius:8,
+        border:`1px solid ${t.greenBorder}`}}>
+        <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,fontSize:12,
+          color:t.green,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:4}}>
+          Graduated to Regular Classes
+        </div>
+        <div style={{fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.textDim}}>
+          {grads.join(" · ")} — moved from NOV into classed competition for Pts 2
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+// ─── MAIN APP ────────────────────────────────────────────────────────────────
+
+const TABS = [
+  {id:"overview",label:"Season Overview"},
+  {id:"standings",label:"Standings"},
+  {id:"analysis",label:"Deep Dive"},
+];
+
+function NHSCCDashboard() {
+  const [activeTab, setActiveTab] = useState("overview");
+  const [isDark, setIsDark] = useState(true);
+  const t = isDark ? darkTheme : lightTheme;
+
+  return (
+    <ThemeCtx.Provider value={t}>
+      <link href={FONT_URL} rel="stylesheet" />
+      <div style={{
+        minHeight:"100vh",background:t.bg,color:t.text,
+        fontFamily:"'Barlow',sans-serif",padding:"24px 16px",maxWidth:1100,margin:"0 auto",
+        transition:"background 0.3s, color 0.3s",
+      }}>
+        <div style={{marginBottom:28,position:"relative"}}>
+          <div style={{display:"flex",alignItems:"center",gap:14,marginBottom:4,paddingRight:110}}>
+            <div style={{
+              width:48,height:48,borderRadius:10,flexShrink:0,
+              background:`linear-gradient(135deg,${t.accent},${t.accentDim})`,
+              display:"flex",alignItems:"center",justifyContent:"center",
+              fontFamily:"'Barlow Condensed',sans-serif",fontWeight:900,fontSize:22,color:t.logoText,
+              boxShadow:t.logoShadow,
+            }}>NH</div>
+            <div>
+              <h1 style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:900,fontSize:28,
+                margin:0,letterSpacing:"0.04em",textTransform:"uppercase",lineHeight:1,
+                background:t.headingGradient,
+                WebkitBackgroundClip:"text",WebkitTextFillColor:"transparent"}}>
+                NHSCC Season Dashboard
+              </h1>
+              <p style={{fontFamily:"'Barlow',sans-serif",fontSize:13,color:t.textDim,margin:"2px 0 0",fontWeight:400}}>
+                2026 Points Series &middot; North Park Pool Lot &middot; 2 of ? events complete
+              </p>
+            </div>
+          </div>
+          <ThemeToggle isDark={isDark} onToggle={() => setIsDark(!isDark)} />
+        </div>
+
+        <TabBar tabs={TABS} active={activeTab} onChange={setActiveTab} />
+
+        {activeTab === "overview" && (
+          <div style={{display:"flex",flexDirection:"column",gap:16}}>
+            <SeasonOverview />
+            <div style={{display:"grid",gap:16,gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))"}}>
+              <EventComparison />
+              <RetentionWidget />
+            </div>
+            <CategoryBreakdown />
+          </div>
+        )}
+
+        {activeTab === "standings" && (
+          <div style={{display:"flex",flexDirection:"column",gap:16}}>
+            <PointsStandings />
+            <div style={{display:"grid",gap:16,gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))"}}>
+              <PaxLeaderboard />
+              <NoviceSpotlight />
+            </div>
+          </div>
+        )}
+
+        {activeTab === "analysis" && (
+          <div style={{display:"flex",flexDirection:"column",gap:16}}>
+            <div style={{display:"grid",gap:16,gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))"}}>
+              <MoversShakers />
+              <Card>
+                <SectionTitle sub="Key trends and observations through 2 events">Season Narrative</SectionTitle>
+                <div style={{display:"flex",flexDirection:"column",gap:14}}>
+                  {[
+                    {icon:"🏆",title:"Eric Coffman's FTD Streak",desc:"Back-to-back fastest time of day in the NSX. His PAX consistency across different course designs is the benchmark right now."},
+                    {icon:"📈",title:"Field Growth: +18%",desc:"133 drivers at Points 2, up from 113. The season is building momentum. 59 brand-new faces showed up for the second event."},
+                    {icon:"🎯",title:"Cleaner Driving",desc:"Clean run rate jumped from 84.8% to 90.5%. DNFs plummeted from 23 to just 1. The field is dialing in."},
+                    {icon:"🔄",title:"12-Way Tie at the Top",desc:"A dozen class winners sit at a perfect 20 points. The next few events will separate the contenders from the pretenders."},
+                    {icon:"🆕",title:"Novice Class Shift",desc:"18 novices in Pts 1 vs only 4 in Pts 2. Several graduated to classed competition — a healthy sign of driver development."},
+                    {icon:"⚡",title:"EV Category Growing",desc:"Electric Vehicle class grew from 3 to 5 entries. Robert Killmer's Tesla Midnight remains dominant with back-to-back class wins."},
+                  ].map((item,i) => (
+                    <div key={i} style={{display:"flex",gap:12,padding:"12px 14px",
+                      background:t.subtleBg,borderRadius:8,border:`1px solid ${t.cardBorder}`}}>
+                      <span style={{fontSize:20,lineHeight:1.4}}>{item.icon}</span>
+                      <div>
+                        <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:14,
+                          color:t.text,marginBottom:2}}>{item.title}</div>
+                        <div style={{fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.textDim,
+                          lineHeight:1.5}}>{item.desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        <div style={{marginTop:32,padding:"16px 0",borderTop:`1px solid ${t.cardBorder}`,
+          textAlign:"center",fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textMuted}}>
+          North Hills Sports Car Club &middot; 2026 Season &middot; Data through Points 2 (Apr 12)
+        </div>
+      </div>
+    </ThemeCtx.Provider>
+  );
+}
+
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(React.createElement(NHSCCDashboard));
+  </script>
+</body>
+</html>
