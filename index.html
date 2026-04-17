@@ -23,82 +23,23 @@
 
   <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.9/babel.min.js"></script>
 
+  <script src="data.js"></script>
+
   <script type="text/babel" data-type="module">
     const { useState, createContext, useContext } = React;
 
 
 // ─── DATA ────────────────────────────────────────────────────────────────────
+// All event data lives in data.js. Edit that file to update the dashboard.
 
-const EVENTS = [
-  { id:1, name:"The Colbert Course", subtitle:"Points 1", date:"Mar 29", drivers:113, runs:715, ftdDriver:"Eric Coffman", ftdTime:20.473, avgTime:23.445, cleanRate:84.8, pylons:48, dnf:23, oc:37, ocPct:5.2 },
-  { id:2, name:"Baker's Dozen", subtitle:"Points 2", date:"Apr 12", drivers:133, runs:785, ftdDriver:"Eric Coffman", ftdTime:27.047, avgTime:30.468, cleanRate:90.5, pylons:60, dnf:1, oc:17, ocPct:2.2 },
-];
-
-const E1_PAX_TOP = [
-  {name:"Eric Coffman",pax:17.197,cls:"SS",car:"Acura NSX"},
-  {name:"Sean ODonnell",pax:17.391,cls:"BST",car:"VW Golf R"},
-  {name:"David Schneider",pax:17.516,cls:"GS",car:"Hyundai Elantra N"},
-  {name:"Ryan Koleno",pax:17.530,cls:"CAMS",car:"Chevy Corvette"},
-  {name:"Bob Smith",pax:17.555,cls:"SB",car:"Porsche Cayman S"},
-  {name:"Chris Zavolta",pax:17.574,cls:"CAMT",car:"Chevy Camaro SS"},
-  {name:"Kevin Duque",pax:17.701,cls:"STB",car:"Subaru WRX"},
-  {name:"Robert Killmer",pax:17.721,cls:"EVX",car:"Tesla Midnight"},
-  {name:"Albert Wurst",pax:17.768,cls:"CAMS",car:"Chevy Corvette"},
-  {name:"Justin LaBarge",pax:17.775,cls:"DS",car:"VW Golf R"},
-];
-const E2_PAX_TOP = [
-  {name:"Chad Englert",pax:22.344,cls:"SB",car:"Chevy Camaro"},
-  {name:"Randy Pearson",pax:22.655,cls:"DS",car:"Honda Civic Type R"},
-  {name:"Eric Coffman",pax:22.719,cls:"SS",car:"Acura NSX"},
-  {name:"Steven Matchett",pax:22.812,cls:"CS",car:"Mazda MX-5"},
-  {name:"David Schneider",pax:22.849,cls:"GS",car:"Hyundai Elantra N"},
-  {name:"Jake Glover",pax:22.879,cls:"STB",car:"Toyota GR86"},
-  {name:"Ryan Koleno",pax:22.911,cls:"CAMS",car:"Chevy Corvette"},
-  {name:"Robert Killmer",pax:23.020,cls:"EVX",car:"Tesla Midnight"},
-  {name:"Chris Zavolta",pax:23.022,cls:"CAMT",car:"Chevy Camaro SS"},
-  {name:"Albert Wurst",pax:23.311,cls:"CAMS",car:"Chevy Corvette"},
-];
-
-const STANDINGS = [
-  {name:"Eric Coffman",cls:"SS",p1:10,p2:10,total:20,events:2},
-  {name:"Ryan Koleno",cls:"CAMS",p1:10,p2:10,total:20,events:2},
-  {name:"Matt Fallat",cls:"EST",p1:10,p2:10,total:20,events:2},
-  {name:"Sean ODonnell",cls:"BST",p1:10,p2:10,total:20,events:2},
-  {name:"Kevin Duque",cls:"GST",p1:10,p2:10,total:20,events:2},
-  {name:"Robert Killmer",cls:"EVX",p1:10,p2:10,total:20,events:2},
-  {name:"Chris Zavolta",cls:"CAMT",p1:10,p2:10,total:20,events:2},
-  {name:"Mark Sanner",cls:"HS",p1:10,p2:10,total:20,events:2},
-  {name:"Thomas Roberts",cls:"CAMC",p1:10,p2:10,total:20,events:2},
-  {name:"Derek McMillen",cls:"UB",p1:10,p2:10,total:20,events:2},
-  {name:"Zac Lakenan",cls:"XA",p1:10,p2:10,total:20,events:2},
-  {name:"David Schneider",cls:"GS",p1:10,p2:10,total:20,events:2},
-  {name:"Jay Gyger",cls:"HB",p1:10,p2:7,total:17,events:2},
-  {name:"Bob Smith",cls:"SB",p1:10,p2:7,total:17,events:2},
-  {name:"Roberto Redondo",cls:"BS",p1:7,p2:10,total:17,events:2},
-  {name:"David Lang",cls:"VIN",p1:10,p2:7,total:17,events:2},
-  {name:"Steve Blough",cls:"SSM",p1:10,p2:7,total:17,events:2},
-  {name:"David Stoner",cls:"SSM",p1:7,p2:10,total:17,events:2},
-  {name:"Jon Lauer",cls:"CS",p1:10,p2:5,total:15,events:2},
-  {name:"Cade Corey",cls:"UB",p1:7,p2:7,total:14,events:2},
-];
-
-const MOVERS_UP = [
-  {name:"Noah Snyder",r1:"96/113",r2:"78/133",pct:"+26%"},
-  {name:"Brian Pearson",r1:"100/113",r2:"87/133",pct:"+23%"},
-  {name:"Jimmy Craig",r1:"75/113",r2:"66/133",pct:"+17%"},
-  {name:"Brian Banas",r1:"77/113",r2:"71/133",pct:"+15%"},
-  {name:"Chad Arndt",r1:"110/113",r2:"111/133",pct:"+14%"},
-];
-const MOVERS_DOWN = [
-  {name:"Kurt Emigh",r1:"48/113",r2:"108/133",pct:"-39%"},
-  {name:"Charles Stunkard",r1:"45/113",r2:"99/133",pct:"-35%"},
-  {name:"Armand Engelbrecht",r1:"71/113",r2:"125/133",pct:"-31%"},
-  {name:"Ross Ivey",r1:"16/113",r2:"54/133",pct:"-26%"},
-  {name:"Sean Peck",r1:"14/113",r2:"47/133",pct:"-23%"},
-];
-
-const CAT_DATA_E1 = {Street:30,"Street Touring":9,"Classic American Muscle":19,"Electric Vehicle":3,"Hoosier Bump":9,Novice:18,"Street Bump":5,"Street Modified":5,"Street Touring Bump":5,Vintage:3,"Xtreme Street":7};
-const CAT_DATA_E2 = {Street:46,"Street Touring":19,"Classic American Muscle":21,"Electric Vehicle":5,"Hoosier Bump":2,Novice:4,"Street Bump":5,"Street Modified":6,"Street Touring Bump":5,Vintage:6,"Xtreme Street":6,Prepared:3,"Street Prepared":3,"Unlimited Bump":2};
+const {
+  SEASON, EVENTS,
+  E1_PAX_TOP, E2_PAX_TOP,
+  STANDINGS,
+  MOVERS_UP, MOVERS_DOWN,
+  CAT_DATA_E1, CAT_DATA_E2,
+  NOVICE, NARRATIVE,
+} = window.NHSCC_DATA;
 
 // ─── THEMES ─────────────────────────────────────────────────────────────────
 
@@ -220,21 +161,22 @@ function ThemeToggle({ isDark, onToggle }) {
 
 function SeasonOverview() {
   const t = useT();
-  const growth = ((133-113)/113*100).toFixed(0);
+  const first = EVENTS[0].drivers, last = EVENTS[EVENTS.length-1].drivers;
+  const growth = ((last-first)/first*100).toFixed(0);
   return (
     <div style={{display:"grid",gap:16,gridTemplateColumns:"repeat(auto-fit,minmax(280px,1fr))"}}>
       <Card>
         <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
           <div style={{width:40,height:40,borderRadius:10,background:`linear-gradient(135deg,${t.accent},${t.accentDim})`,
-            display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,color:t.logoText,fontWeight:800}}>2</div>
+            display:"flex",alignItems:"center",justifyContent:"center",fontSize:18,color:t.logoText,fontWeight:800}}>{EVENTS.length}</div>
           <div>
             <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:16,color:t.text}}>Events Complete</div>
-            <div style={{fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.textDim}}>2026 Points Series</div>
+            <div style={{fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.textDim}}>{SEASON.seriesName}</div>
           </div>
         </div>
         <div style={{display:"flex",gap:8}}>
-          <StatBox label="Unique Drivers" value="172" />
-          <StatBox label="Total Runs" value="1,500" />
+          <StatBox label="Unique Drivers" value={SEASON.totals.uniqueDrivers} />
+          <StatBox label="Total Runs" value={SEASON.totals.totalRuns.toLocaleString()} />
           <StatBox label="Growth" value={`+${growth}%`} accent />
         </div>
       </Card>
@@ -270,7 +212,7 @@ function PointsStandings() {
   const data = showAll ? STANDINGS : STANDINGS.slice(0,12);
   return (
     <Card>
-      <SectionTitle sub="Class winners after 2 events — 12 drivers with perfect 20pts">Points Standings</SectionTitle>
+      <SectionTitle sub={`Class winners after ${EVENTS.length} events — ${STANDINGS.filter(d=>d.total===EVENTS.length*10).length} drivers with perfect ${EVENTS.length*10}pts`}>Points Standings</SectionTitle>
       <div style={{overflowX:"auto"}}>
         <table style={{width:"100%",borderCollapse:"collapse",fontFamily:"'Barlow',sans-serif",fontSize:13}}>
           <thead>
@@ -407,6 +349,7 @@ function MoversShakers() {
 
 function CategoryBreakdown() {
   const t = useT();
+  const [hover, setHover] = useState(null); // { i, series: "e1"|"e2" } | null
   const allCats = [...new Set([...Object.keys(CAT_DATA_E1), ...Object.keys(CAT_DATA_E2)])].sort();
   const chartData = allCats.map(c => ({
     name: c.replace("Classic American Muscle","CAM").replace("Street Touring Bump","ST Bump")
@@ -417,27 +360,102 @@ function CategoryBreakdown() {
     e1: CAT_DATA_E1[c]||0, e2: CAT_DATA_E2[c]||0, full: c,
   }));
   const maxVal = Math.max(...chartData.map(d => Math.max(d.e1, d.e2)));
+  const e1Total = chartData.reduce((s,d)=>s+d.e1,0);
+  const e2Total = chartData.reduce((s,d)=>s+d.e2,0);
+  const activeLabel = EVENTS[0].subtitle, activeLabel2 = EVENTS[1]?.subtitle || "Pts 2";
+  const hoveredCat = hover ? chartData[hover.i] : null;
+
+  const barStyle = (series, i, h) => {
+    const isHovered = hover && hover.i === i && hover.series === series;
+    const anyHover = hover !== null;
+    const dim = anyHover && !isHovered;
+    const base = series === "e1" ? t.blue : t.accent;
+    return {
+      width:"40%", maxWidth:24, height:h, background:base,
+      borderRadius:"3px 3px 0 0",
+      opacity: series === "e1" ? (dim ? 0.25 : (isHovered ? 1 : 0.7)) : (dim ? 0.35 : 1),
+      transform: isHovered ? "scaleY(1.03)" : "scaleY(1)",
+      transformOrigin: "bottom",
+      transition: "opacity 0.15s, transform 0.15s, height 0.3s",
+      cursor: "pointer",
+    };
+  };
+
   return (
     <Card>
       <SectionTitle sub="Driver distribution by category across events">Category Breakdown</SectionTitle>
-      <div style={{display:"flex",gap:6,alignItems:"flex-end",height:220,padding:"0 4px"}}>
-        {chartData.map((d,i) => {
-          const h1 = (d.e1/maxVal)*180;
-          const h2 = (d.e2/maxVal)*180;
-          return (
-            <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2,minWidth:0}}>
-              <div style={{display:"flex",gap:2,alignItems:"flex-end",width:"100%",justifyContent:"center",height:180}}>
-                <div style={{width:"40%",maxWidth:24,height:h1,background:t.blue,borderRadius:"3px 3px 0 0",opacity:0.7,transition:"height 0.3s",position:"relative"}}
-                  title={d.full + " Pts 1: " + d.e1} />
-                <div style={{width:"40%",maxWidth:24,height:h2,background:t.accent,borderRadius:"3px 3px 0 0",transition:"height 0.3s"}}
-                  title={d.full + " Pts 2: " + d.e2} />
+      <div style={{position:"relative"}}>
+        <div style={{display:"flex",gap:6,alignItems:"flex-end",height:220,padding:"0 4px"}}
+          onMouseLeave={()=>setHover(null)}>
+          {chartData.map((d,i) => {
+            const h1 = (d.e1/maxVal)*180;
+            const h2 = (d.e2/maxVal)*180;
+            const catHovered = hover && hover.i === i;
+            return (
+              <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2,minWidth:0}}>
+                <div style={{display:"flex",gap:2,alignItems:"flex-end",width:"100%",justifyContent:"center",height:180}}>
+                  <div style={barStyle("e1", i, h1)}
+                    onMouseEnter={()=>setHover({i, series:"e1"})} />
+                  <div style={barStyle("e2", i, h2)}
+                    onMouseEnter={()=>setHover({i, series:"e2"})} />
+                </div>
+                <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:9,
+                  color:catHovered ? t.text : t.textMuted,
+                  fontWeight:catHovered ? 700 : 400,
+                  textAlign:"center",lineHeight:1.1,width:"100%",overflow:"hidden",textOverflow:"ellipsis",
+                  whiteSpace:"nowrap",transform:"rotate(-40deg)",transformOrigin:"center",marginTop:4,height:30,
+                  transition:"color 0.15s, font-weight 0.15s"}}>{d.name}</div>
               </div>
-              <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:9,color:t.textMuted,
-                textAlign:"center",lineHeight:1.1,width:"100%",overflow:"hidden",textOverflow:"ellipsis",
-                whiteSpace:"nowrap",transform:"rotate(-40deg)",transformOrigin:"center",marginTop:4,height:30}}>{d.name}</div>
+            );
+          })}
+        </div>
+        {hoveredCat && (
+          <div style={{
+            position:"absolute", top:-6, left:"50%", transform:"translateX(-50%)",
+            background:t.tooltipBg, border:`1px solid ${t.cardBorder}`, borderRadius:8,
+            padding:"10px 14px", boxShadow:t.mode==="light" ? "0 4px 12px rgba(0,0,0,0.08)" : "0 4px 16px rgba(0,0,0,0.4)",
+            fontFamily:"'Barlow',sans-serif", fontSize:12, color:t.text,
+            pointerEvents:"none", minWidth:200, zIndex:10,
+          }}>
+            <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:14,
+              textTransform:"uppercase",letterSpacing:"0.06em",color:t.text,marginBottom:6}}>
+              {hoveredCat.full}
             </div>
-          );
-        })}
+            <div style={{display:"flex",justifyContent:"space-between",gap:16,padding:"3px 0",
+              opacity: hover.series==="e1" ? 1 : 0.6}}>
+              <span style={{display:"flex",alignItems:"center",gap:6,color:t.textDim}}>
+                <span style={{width:8,height:8,borderRadius:2,background:t.blue,opacity:0.8,display:"inline-block"}} />
+                {activeLabel}
+              </span>
+              <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,color:t.text}}>
+                {hoveredCat.e1} <span style={{color:t.textMuted,fontWeight:400,fontSize:10}}>({e1Total ? ((hoveredCat.e1/e1Total)*100).toFixed(1) : 0}%)</span>
+              </span>
+            </div>
+            <div style={{display:"flex",justifyContent:"space-between",gap:16,padding:"3px 0",
+              opacity: hover.series==="e2" ? 1 : 0.6}}>
+              <span style={{display:"flex",alignItems:"center",gap:6,color:t.textDim}}>
+                <span style={{width:8,height:8,borderRadius:2,background:t.accent,display:"inline-block"}} />
+                {activeLabel2}
+              </span>
+              <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,color:t.text}}>
+                {hoveredCat.e2} <span style={{color:t.textMuted,fontWeight:400,fontSize:10}}>({e2Total ? ((hoveredCat.e2/e2Total)*100).toFixed(1) : 0}%)</span>
+              </span>
+            </div>
+            <div style={{borderTop:`1px solid ${t.cardBorder}`,marginTop:6,paddingTop:6,
+              display:"flex",justifyContent:"space-between",gap:16}}>
+              <span style={{color:t.textDim}}>Change</span>
+              <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,
+                color: hoveredCat.e2 > hoveredCat.e1 ? t.green : hoveredCat.e2 < hoveredCat.e1 ? t.red : t.textDim}}>
+                {hoveredCat.e2 - hoveredCat.e1 > 0 ? "+" : ""}{hoveredCat.e2 - hoveredCat.e1}
+                {hoveredCat.e1 > 0 && (
+                  <span style={{fontWeight:400,fontSize:11,marginLeft:4}}>
+                    ({hoveredCat.e2 - hoveredCat.e1 > 0 ? "+" : ""}{(((hoveredCat.e2 - hoveredCat.e1)/hoveredCat.e1)*100).toFixed(0)}%)
+                  </span>
+                )}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
       <div style={{display:"flex",gap:16,justifyContent:"center",marginTop:16}}>
         <div style={{display:"flex",alignItems:"center",gap:6,fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.textDim}}>
@@ -453,43 +471,71 @@ function CategoryBreakdown() {
 
 function EventComparison() {
   const t = useT();
+  const [hover, setHover] = useState(null);
+  const e1 = EVENTS[0], e2 = EVENTS[1] || EVENTS[0];
   const metrics = [
-    { label:"Drivers", e1:113, e2:133 },
-    { label:"Total Runs", e1:715, e2:785 },
-    { label:"Clean Rate %", e1:84.8, e2:90.5 },
-    { label:"Pylons Hit", e1:48, e2:60 },
-    { label:"Off Course", e1:37, e2:17 },
-    { label:"DNFs", e1:23, e2:1 },
-    { label:"Classes", e1:20, e2:24 },
+    { label:"Drivers",      e1:e1.drivers,   e2:e2.drivers },
+    { label:"Total Runs",   e1:e1.runs,      e2:e2.runs },
+    { label:"Clean Rate %", e1:e1.cleanRate, e2:e2.cleanRate },
+    { label:"Pylons Hit",   e1:e1.pylons,    e2:e2.pylons },
+    { label:"Off Course",   e1:e1.oc,        e2:e2.oc },
+    { label:"DNFs",         e1:e1.dnf,       e2:e2.dnf },
   ];
+  const lowerIsBetter = new Set(["DNFs","Off Course","Pylons Hit"]);
+  const fmtDelta = (m) => {
+    const d = m.e2 - m.e1;
+    if (d === 0) return "±0";
+    const sign = d > 0 ? "+" : "";
+    const pct = m.e1 ? ` (${sign}${((d/m.e1)*100).toFixed(0)}%)` : "";
+    return `${sign}${+d.toFixed(2)}${pct}`;
+  };
   return (
     <Card>
-      <SectionTitle sub="Side-by-side event metrics">Event Comparison</SectionTitle>
+      <SectionTitle sub="Side-by-side event metrics — hover a row for delta">Event Comparison</SectionTitle>
       <div style={{display:"grid",gridTemplateColumns:"1fr auto 1fr",gap:0,alignItems:"center"}}>
         <div style={{textAlign:"center",fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,
-          fontSize:13,color:t.blue,textTransform:"uppercase",letterSpacing:"0.08em",paddingBottom:10}}>Pts 1</div>
+          fontSize:13,color:t.blue,textTransform:"uppercase",letterSpacing:"0.08em",paddingBottom:10}}>{e1.subtitle}</div>
         <div />
         <div style={{textAlign:"center",fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,
-          fontSize:13,color:t.accent,textTransform:"uppercase",letterSpacing:"0.08em",paddingBottom:10}}>Pts 2</div>
+          fontSize:13,color:t.accent,textTransform:"uppercase",letterSpacing:"0.08em",paddingBottom:10}}>{e2.subtitle}</div>
         {metrics.map((m,i) => {
-          const max = Math.max(m.e1,m.e2);
+          const max = Math.max(m.e1,m.e2) || 1;
           const e1w = (m.e1/max)*100;
           const e2w = (m.e2/max)*100;
-          const e2better = (m.label==="DNFs" || m.label==="Off Course") ? m.e2<m.e1 : m.e2>m.e1;
+          const e2better = lowerIsBetter.has(m.label) ? m.e2<m.e1 : m.e2>m.e1;
+          const isHover = hover === i;
+          const rowBg = isHover ? t.subtleBg : "transparent";
+          const onEnter = ()=>setHover(i);
+          const onLeave = ()=>setHover(null);
+          const delta = m.e2 - m.e1;
+          const deltaColor = delta === 0 ? t.textDim : (e2better ? t.green : t.red);
           return [
-            <div key={`e1-${i}`} style={{display:"flex",alignItems:"center",gap:8,justifyContent:"flex-end",padding:"6px 0"}}>
+            <div key={`e1-${i}`} onMouseEnter={onEnter} onMouseLeave={onLeave}
+              style={{display:"flex",alignItems:"center",gap:8,justifyContent:"flex-end",padding:"6px 8px",
+                background:rowBg,borderRadius:"6px 0 0 6px",transition:"background 0.15s",cursor:"default"}}>
               <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:16,
                 color:!e2better?t.text:t.textMuted,minWidth:40,textAlign:"right"}}>{m.e1}</span>
               <div style={{width:80,height:6,background:t.subtleBg2,borderRadius:3,overflow:"hidden",direction:"rtl"}}>
-                <div style={{width:`${e1w}%`,height:"100%",background:t.blue,borderRadius:3}} />
+                <div style={{width:`${e1w}%`,height:"100%",background:t.blue,borderRadius:3,
+                  transition:"width 0.3s"}} />
               </div>
             </div>,
-            <div key={`label-${i}`} style={{textAlign:"center",padding:"6px 12px",fontFamily:"'Barlow',sans-serif",
-              fontSize:11,color:t.textMuted,textTransform:"uppercase",letterSpacing:"0.06em",fontWeight:500,
-              whiteSpace:"nowrap"}}>{m.label}</div>,
-            <div key={`e2-${i}`} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0"}}>
+            <div key={`label-${i}`} onMouseEnter={onEnter} onMouseLeave={onLeave}
+              style={{textAlign:"center",padding:"6px 12px",fontFamily:"'Barlow',sans-serif",
+                fontSize:11,color:isHover ? t.text : t.textMuted,textTransform:"uppercase",letterSpacing:"0.06em",
+                fontWeight:isHover ? 700 : 500,whiteSpace:"nowrap",background:rowBg,
+                transition:"color 0.15s, font-weight 0.15s",position:"relative"}}>
+              {isHover ? (
+                <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:12,
+                  color:deltaColor,letterSpacing:"0.04em"}}>{fmtDelta(m)}</span>
+              ) : m.label}
+            </div>,
+            <div key={`e2-${i}`} onMouseEnter={onEnter} onMouseLeave={onLeave}
+              style={{display:"flex",alignItems:"center",gap:8,padding:"6px 8px",background:rowBg,
+                borderRadius:"0 6px 6px 0",transition:"background 0.15s",cursor:"default"}}>
               <div style={{width:80,height:6,background:t.subtleBg2,borderRadius:3,overflow:"hidden"}}>
-                <div style={{width:`${e2w}%`,height:"100%",background:t.accent,borderRadius:3}} />
+                <div style={{width:`${e2w}%`,height:"100%",background:t.accent,borderRadius:3,
+                  transition:"width 0.3s"}} />
               </div>
               <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:16,
                 color:e2better?t.text:t.textMuted,minWidth:40}}>{m.e2}</span>
@@ -503,7 +549,10 @@ function EventComparison() {
 
 function RetentionWidget() {
   const t = useT();
-  const pct = ((74/(74+39))*100).toFixed(0);
+  const { returning, oneEventOnly, newInLatest, uniqueDrivers } = SEASON.totals;
+  const prev = EVENTS[EVENTS.length-2] || EVENTS[0];
+  const curr = EVENTS[EVENTS.length-1];
+  const pct = ((returning/(returning+oneEventOnly))*100).toFixed(0);
   return (
     <Card>
       <SectionTitle sub="Driver retention and new registrations between events">Participation Flow</SectionTitle>
@@ -511,25 +560,25 @@ function RetentionWidget() {
         <div style={{textAlign:"center"}}>
           <div style={{width:90,height:90,borderRadius:"50%",border:`3px solid ${t.blue}`,
             display:"flex",alignItems:"center",justifyContent:"center",background:t.blueBg}}>
-            <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:28,color:t.blue}}>113</div>
+            <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:28,color:t.blue}}>{prev.drivers}</div>
           </div>
-          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textDim,marginTop:6}}>Pts 1</div>
+          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textDim,marginTop:6}}>{prev.subtitle}</div>
         </div>
         <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
           <div style={{display:"flex",alignItems:"center",gap:4}}>
-            <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:14,color:t.green}}>74</span>
+            <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:14,color:t.green}}>{returning}</span>
             <span style={{color:t.green,fontSize:18}}>→</span>
           </div>
           <div style={{fontFamily:"'Barlow',sans-serif",fontSize:10,color:t.textMuted}}>returned</div>
           <div style={{width:1,height:16,background:t.cardBorder}} />
-          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:10,color:t.textMuted}}>39 one-event</div>
+          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:10,color:t.textMuted}}>{oneEventOnly} one-event</div>
         </div>
         <div style={{textAlign:"center"}}>
           <div style={{width:100,height:100,borderRadius:"50%",border:`3px solid ${t.accent}`,
             display:"flex",alignItems:"center",justifyContent:"center",background:t.accentBgSoft}}>
-            <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:28,color:t.accent}}>133</div>
+            <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:28,color:t.accent}}>{curr.drivers}</div>
           </div>
-          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textDim,marginTop:6}}>Pts 2</div>
+          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textDim,marginTop:6}}>{curr.subtitle}</div>
         </div>
       </div>
       <div style={{display:"flex",gap:8,justifyContent:"center",marginTop:4}}>
@@ -538,11 +587,11 @@ function RetentionWidget() {
           <div style={{fontFamily:"'Barlow',sans-serif",fontSize:10,color:t.textMuted}}>Retention Rate</div>
         </div>
         <div style={{padding:"8px 14px",background:t.accentBg,borderRadius:8,textAlign:"center"}}>
-          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:20,color:t.accent}}>59</div>
-          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:10,color:t.textMuted}}>New in Pts 2</div>
+          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:20,color:t.accent}}>{newInLatest}</div>
+          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:10,color:t.textMuted}}>New in {curr.subtitle}</div>
         </div>
         <div style={{padding:"8px 14px",background:t.purpleBg,borderRadius:8,textAlign:"center"}}>
-          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:20,color:t.purple}}>172</div>
+          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:20,color:t.purple}}>{uniqueDrivers}</div>
           <div style={{fontFamily:"'Barlow',sans-serif",fontSize:10,color:t.textMuted}}>Total Unique</div>
         </div>
       </div>
@@ -552,20 +601,16 @@ function RetentionWidget() {
 
 function NoviceSpotlight() {
   const t = useT();
-  const novE1 = [{name:"Jeff Ferguson",time:21.286,car:"Acura NSX",pos:1},
-    {name:"Larry Spector",time:22.732,car:"Chevy Camaro SS 1LE",pos:2},
-    {name:"Colin Longmore",time:23.075,car:"Scion FRS",pos:3}];
-  const novE2 = [{name:"Brandon Bufalini",time:30.881,car:"Ford Focus ST",pos:1},
-    {name:"Michael Bushko",time:31.124,car:"Hyundai Elantra N",pos:2},
-    {name:"Aaron Rankin",time:31.238,car:"Subaru Forester XT",pos:3}];
-  const grads = ["Noah Snyder","Chad Arndt","Devon Mcghen"];
+  const novE1 = NOVICE.e1.top;
+  const novE2 = NOVICE.e2.top;
+  const grads = NOVICE.graduates;
   return (
     <Card>
       <SectionTitle sub="Newcomer performance and graduates to regular classes">Novice Spotlight</SectionTitle>
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
         <div>
           <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,fontSize:12,
-            color:t.blue,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:8}}>Pts 1 — 18 novices</div>
+            color:t.blue,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:8}}>Pts 1 — {NOVICE.e1.count} novices</div>
           {novE1.map(n => (
             <div key={n.name} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",
               borderBottom:`1px solid ${t.cardBorder}`}}>
@@ -580,7 +625,7 @@ function NoviceSpotlight() {
         </div>
         <div>
           <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,fontSize:12,
-            color:t.accent,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:8}}>Pts 2 — 4 novices</div>
+            color:t.accent,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:8}}>Pts 2 — {NOVICE.e2.count} novices</div>
           {novE2.map(n => (
             <div key={n.name} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",
               borderBottom:`1px solid ${t.cardBorder}`}}>
@@ -626,7 +671,7 @@ function NHSCCDashboard() {
       <link href={FONT_URL} rel="stylesheet" />
       <div style={{
         minHeight:"100vh",background:t.bg,color:t.text,
-        fontFamily:"'Barlow',sans-serif",padding:"24px clamp(16px, 3vw, 48px)",maxWidth:1440,margin:"0 auto",
+        fontFamily:"'Barlow',sans-serif",padding:"24px clamp(16px, 3vw, 80px)",
         transition:"background 0.3s, color 0.3s",
       }}>
         <div style={{marginBottom:28,position:"relative"}}>
@@ -646,7 +691,7 @@ function NHSCCDashboard() {
                 NHSCC Season Dashboard
               </h1>
               <p style={{fontFamily:"'Barlow',sans-serif",fontSize:13,color:t.textDim,margin:"2px 0 0",fontWeight:400}}>
-                2026 Points Series &middot; North Park Pool Lot &middot; 2 of ? events complete
+                {SEASON.seriesName} &middot; {SEASON.location} &middot; {EVENTS.length} of {SEASON.totalEvents} events complete
               </p>
             </div>
           </div>
@@ -681,16 +726,9 @@ function NHSCCDashboard() {
             <div style={{display:"grid",gap:16,gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))"}}>
               <MoversShakers />
               <Card>
-                <SectionTitle sub="Key trends and observations through 2 events">Season Narrative</SectionTitle>
+                <SectionTitle sub={`Key trends and observations through ${EVENTS.length} events`}>Season Narrative</SectionTitle>
                 <div style={{display:"flex",flexDirection:"column",gap:14}}>
-                  {[
-                    {icon:"🏆",title:"Eric Coffman's FTD Streak",desc:"Back-to-back fastest time of day in the NSX. His PAX consistency across different course designs is the benchmark right now."},
-                    {icon:"📈",title:"Field Growth: +18%",desc:"133 drivers at Points 2, up from 113. The season is building momentum. 59 brand-new faces showed up for the second event."},
-                    {icon:"🎯",title:"Cleaner Driving",desc:"Clean run rate jumped from 84.8% to 90.5%. Off courses dropped from 37 to 17, DNFs from 23 to just 1. The field is dialing in."},
-                    {icon:"🔄",title:"12-Way Tie at the Top",desc:"A dozen class winners sit at a perfect 20 points. The next few events will separate the contenders from the pretenders."},
-                    {icon:"🆕",title:"Novice Class Shift",desc:"18 novices in Pts 1 vs only 4 in Pts 2. Several graduated to classed competition — a healthy sign of driver development."},
-                    {icon:"⚡",title:"EV Category Growing",desc:"Electric Vehicle class grew from 3 to 5 entries. Robert Killmer's Tesla Midnight remains dominant with back-to-back class wins."},
-                  ].map((item,i) => (
+                  {NARRATIVE.map((item,i) => (
                     <div key={i} style={{display:"flex",gap:12,padding:"12px 14px",
                       background:t.subtleBg,borderRadius:8,border:`1px solid ${t.cardBorder}`}}>
                       <span style={{fontSize:20,lineHeight:1.4}}>{item.icon}</span>
@@ -710,7 +748,7 @@ function NHSCCDashboard() {
 
         <div style={{marginTop:32,padding:"16px 0",borderTop:`1px solid ${t.cardBorder}`,
           textAlign:"center",fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textMuted}}>
-          North Hills Sports Car Club &middot; 2026 Season &middot; Data through Points 2 (Apr 12)
+          North Hills Sports Car Club &middot; {SEASON.year} Season &middot; Data through {SEASON.dataThrough}
         </div>
       </div>
     </ThemeCtx.Provider>
