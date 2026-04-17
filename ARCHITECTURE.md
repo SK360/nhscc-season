@@ -37,7 +37,7 @@ Destructured at the top of `index.html`'s script:
 
 ```
 SEASON        { year, seriesName, location, totalEvents:10, dataThrough, totals:{uniqueDrivers, totalRuns, returning, oneEventOnly, newInLatest} }
-EVENTS        [{ id, name, subtitle, date, drivers, runs, ftdDriver, ftdTime, avgTime, cleanRate, pylons, dnf, oc, ocPct }]
+EVENTS        [{ id, name, subtitle, date, drivers, runs, ftdDriver, ftdTime, paxFtdDriver, paxFtdTime, avgTime, cleanRate, pylons, dnf, oc, ocPct }]
 E1_PAX_TOP    top 10 PAX: [{name, pax, cls, car}]
 E2_PAX_TOP    (per-event; add E3_PAX_TOP etc. as events land)
 STANDINGS     [{name, cls, p1, p2, …, total, events}]
@@ -45,6 +45,12 @@ MOVERS_UP     [{name, r1:"96/113", r2:"78/133", pct:"+26%"}]   // PAX percentile
 MOVERS_DOWN   same shape
 CAT_DATA_E1   { "Street":30, "Street Touring":9, … }  // category → driver count
 CAT_DATA_E2
+CLASS_BATTLES_E1  [{cls, p1:{name,time}, p2:{name,time}, gap, gapPct}]   // tightest in-class PAX 1↔2 gaps, sorted asc
+CLASS_BATTLES_E2  (per-event; top ~8 tightest)
+IMPROVEMENT_E1    [{name, firstClean, bestClean, delta, pct}]  // top 10 first-clean→best-clean improvers
+IMPROVEMENT_E2
+CLEAN_RATE_CLEANEST  [{name, runs, clean, cones, ocdnf, cleanPct}]  // season-wide, min 10 runs
+CLEAN_RATE_CONIEST   same shape, ranked by cone count desc
 NOVICE        { e1:{count, top:[{name,time,car,pos}]}, e2:{…}, graduates:[names] }
 NARRATIVE     [{icon, title, desc}]  // 6-ish season story bullets
 ```
@@ -54,7 +60,10 @@ NARRATIVE     [{icon, title, desc}]  // 6-ish season story bullets
 1. User drops a zip. Extract `fullResults.json` + `eventInfo.json` into `raw/pts-NN-<slug>/` (also archive original CSVs if present).
 2. Recompute from **all** `raw/pts-*/fullResults.json`:
    - `EVENTS[]` — append new event from `eventInfo.json` (`.PageHeader`).
-   - `E{N}_PAX_TOP` — sort `.Results[]` by `float(PAXTime)` ascending, take 10.
+   - `E{N}_PAX_TOP` — sort `.Results[]` by `float(PAXTime)` ascending, take 10. Event's `paxFtdDriver`/`paxFtdTime` is the first entry.
+   - `CLASS_BATTLES_E{N}` — group `Results` by `BumpClass`, find `ClassFinish==1` and `==2`, gap = `PAXTime[2]-PAXTime[1]`; sort asc by gap, take ~8.
+   - `IMPROVEMENT_E{N}` — parse `Times`+`Ps` (both are JSON-encoded strings). For each driver, `firstClean` = first entry where `Ps[i]==""`, `bestClean` = min of clean times; emit delta/pct for drivers who improved; top 10 by pct.
+   - `CLEAN_RATE_CLEANEST` / `CLEAN_RATE_CONIEST` — aggregate across ALL events. Penalty codes: `""`=clean, `"OC"`/`"DNF"`=oc/dnf, `"+N"` (e.g. `"+2"`) = N cones. Min 10 runs to qualify. Top 10 each side.
    - `CAT_DATA_E{N}` — `Counter(r.Category for r in Results)`.
    - `STANDINGS` — aggregate per-driver `Points` across all events; add new `p{N}` column; `total` = sum; `events` = count of events participated.
    - `MOVERS_UP/DOWN` — PAX-percentile change from prior event to new event. Percentile = rank / field_size where rank is 1-indexed ascending PAXTime.
@@ -70,7 +79,7 @@ NARRATIVE     [{icon, title, desc}]  // 6-ish season story bullets
 `fullResults.json` → `.Results[]`:
 - Identity: `FullName`, `Number`, `Car`, `BumpClass` (e.g. `SS`, `CAMS`), `Category` (e.g. `Street`, `Novice`)
 - Times: `BestTime`, `BestUnadjustedTime`, `PAXindex`, `PAXTime` (all strings; parse to float)
-- Runs: `Times` (JSON-encoded string, 12-slot array of run times), `Ps` (parallel penalty array: `""` clean, `"1"`/`"2"` cone count, `"OC"` off-course, `"DNF"`)
+- Runs: `Times` (JSON-encoded string, 12-slot array of run times — only first ~6 filled per event), `Ps` (parallel penalty array, also JSON-encoded string: `""` clean, `"+1"`/`"+2"` cone count with leading `+`, `"OC"` off-course, `"DNF"`)
 - Results: `Place`, `ClassFinish`, `Points` (class-based: 10 for 1st, 7 for 2nd, 5 for 3rd, …)
 
 `eventInfo.json` → `.PageHeader`: `EventName`, `FTD1Driver`/`FTD1Time`, `NumberOfDrivers`, `TotalRuns`, `AvgTime`, `OC` (e.g. `"37 (5.17%)"`), `DNF`, `Pylons`, `FCO`/`LCO`.

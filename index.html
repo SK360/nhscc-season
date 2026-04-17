@@ -48,6 +48,9 @@ const {
   MOVERS_UP, MOVERS_DOWN,
   CAT_DATA_E1, CAT_DATA_E2,
   NOVICE, NARRATIVE,
+  CLASS_BATTLES_E1, CLASS_BATTLES_E2,
+  IMPROVEMENT_E1, IMPROVEMENT_E2,
+  CLEAN_RATE_CLEANEST, CLEAN_RATE_CONIEST,
 } = window.NHSCC_DATA;
 
 // ─── THEMES ─────────────────────────────────────────────────────────────────
@@ -208,6 +211,11 @@ function SeasonOverview() {
           <div style={{marginTop:12,padding:"8px 12px",background:t.accentBgSoft,borderRadius:8,
             fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.accent}}>
             FTD: {ev.ftdDriver} — {ev.ftdTime}s
+          </div>
+          <div style={{marginTop:6,padding:"8px 12px",background:t.subtleBg,borderRadius:8,
+            fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.textDim,
+            border:`1px solid ${t.cardBorder}`}}>
+            PAX FTD: <span style={{color:t.text,fontWeight:600}}>{ev.paxFtdDriver}</span> — {ev.paxFtdTime}s
           </div>
         </Card>
       ))}
@@ -665,6 +673,132 @@ function NoviceSpotlight() {
   );
 }
 
+function ClassBattles() {
+  const t = useT();
+  const [event, setEvent] = useState(EVENTS.length);
+  const list = event===1 ? CLASS_BATTLES_E1 : CLASS_BATTLES_E2;
+  return (
+    <Card>
+      <SectionTitle sub="Tightest 1st↔2nd in-class PAX gaps (closest fights first)">Class Battles</SectionTitle>
+      <div style={{display:"flex",gap:6,marginBottom:12}}>
+        {EVENTS.map(ev => (
+          <button key={ev.id} onClick={()=>setEvent(ev.id)} style={{
+            border:"none",padding:"6px 12px",borderRadius:6,cursor:"pointer",
+            background:event===ev.id?t.accentBg:t.subtleBg,
+            color:event===ev.id?t.accent:t.textDim,
+            fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,fontSize:12,
+            textTransform:"uppercase",letterSpacing:"0.06em"}}>{ev.subtitle}</button>
+        ))}
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:8}}>
+        {list.map((b,i) => (
+          <div key={b.cls} style={{display:"flex",alignItems:"center",gap:10,
+            padding:"10px 12px",background:i===0?t.accentBgSoft:t.subtleBg,
+            border:`1px solid ${i===0?t.accent:t.cardBorder}`,borderRadius:8}}>
+            <Pill color={t.blue}>{b.cls}</Pill>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontFamily:"'Barlow',sans-serif",fontSize:13,color:t.text,fontWeight:500}}>
+                {b.p1.name} <span style={{color:t.textMuted,fontWeight:400}}>({b.p1.time}s)</span>
+              </div>
+              <div style={{fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.textDim}}>
+                vs {b.p2.name} <span style={{color:t.textMuted}}>({b.p2.time}s)</span>
+              </div>
+            </div>
+            <div style={{textAlign:"right"}}>
+              <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:18,
+                color:i===0?t.accent:t.text}}>{b.gap}s</div>
+              <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textMuted}}>{b.gapPct}%</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function ImprovementChart() {
+  const t = useT();
+  const [event, setEvent] = useState(EVENTS.length);
+  const list = event===1 ? IMPROVEMENT_E1 : IMPROVEMENT_E2;
+  const maxPct = Math.max(...list.map(d=>d.pct));
+  return (
+    <Card>
+      <SectionTitle sub="First clean run vs best clean run — who improved most through the day">Biggest Improvers</SectionTitle>
+      <div style={{display:"flex",gap:6,marginBottom:12}}>
+        {EVENTS.map(ev => (
+          <button key={ev.id} onClick={()=>setEvent(ev.id)} style={{
+            border:"none",padding:"6px 12px",borderRadius:6,cursor:"pointer",
+            background:event===ev.id?t.accentBg:t.subtleBg,
+            color:event===ev.id?t.accent:t.textDim,
+            fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,fontSize:12,
+            textTransform:"uppercase",letterSpacing:"0.06em"}}>{ev.subtitle}</button>
+        ))}
+      </div>
+      <div style={{display:"flex",flexDirection:"column",gap:6}}>
+        {list.map((d,i) => (
+          <div key={d.name} style={{display:"flex",alignItems:"center",gap:10}}>
+            <div style={{width:20,textAlign:"center",fontFamily:"'Barlow Condensed',sans-serif",
+              fontWeight:700,fontSize:14,color:i<3?t.accent:t.textMuted}}>{i+1}</div>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                <span style={{fontFamily:"'Barlow',sans-serif",fontSize:13,color:t.text,fontWeight:500,
+                  whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{d.name}</span>
+                <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:13,color:t.green}}>
+                  −{d.delta}s ({d.pct}%)
+                </span>
+              </div>
+              <div style={{height:8,background:t.subtleBg,borderRadius:4,overflow:"hidden"}}>
+                <div style={{width:`${(d.pct/maxPct)*100}%`,height:"100%",
+                  background:`linear-gradient(90deg,${t.green},${t.accent})`}}></div>
+              </div>
+              <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textMuted,marginTop:2}}>
+                {d.firstClean}s → {d.bestClean}s
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
+function CleanLeaderboards() {
+  const t = useT();
+  function Side({title, color, rows, valueKey, valueSuffix}) {
+    return (
+      <div>
+        <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,fontSize:12,
+          color,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:8}}>{title}</div>
+        {rows.map((d,i) => (
+          <div key={d.name} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",
+            borderBottom:`1px solid ${t.cardBorder}`}}>
+            <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:16,
+              color:i===0?color:t.textMuted,width:20,textAlign:"center"}}>{i+1}</span>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{fontFamily:"'Barlow',sans-serif",fontSize:13,color:t.text,fontWeight:500,
+                whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{d.name}</div>
+              <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textMuted}}>
+                {d.clean}/{d.runs} clean · {d.cones} cones · {d.ocdnf} oc/dnf
+              </div>
+            </div>
+            <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:15,
+              color:i===0?color:t.text}}>{d[valueKey]}{valueSuffix}</div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+  return (
+    <Card>
+      <SectionTitle sub="Season-wide, drivers with ≥10 recorded runs">Clean Drivers vs Cone Killers</SectionTitle>
+      <div className="grid-two-col" style={{display:"grid",gap:24,gridTemplateColumns:"1fr 1fr"}}>
+        <Side title="Cleanest" color={t.green} rows={CLEAN_RATE_CLEANEST} valueKey="cleanPct" valueSuffix="%" />
+        <Side title="Most Cones" color={t.accent} rows={CLEAN_RATE_CONIEST} valueKey="cones" valueSuffix="" />
+      </div>
+    </Card>
+  );
+}
+
 // ─── MAIN APP ────────────────────────────────────────────────────────────────
 
 const TABS = [
@@ -735,6 +869,11 @@ function NHSCCDashboard() {
 
         {activeTab === "analysis" && (
           <div style={{display:"flex",flexDirection:"column",gap:16}}>
+            <div style={{display:"grid",gap:16,gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))"}}>
+              <ClassBattles />
+              <ImprovementChart />
+            </div>
+            <CleanLeaderboards />
             <div style={{display:"grid",gap:16,gridTemplateColumns:"repeat(auto-fit,minmax(340px,1fr))"}}>
               <MoversShakers />
               <Card>
