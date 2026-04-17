@@ -12,6 +12,15 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body { margin: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
     button { font-family: inherit; }
+
+    /* Responsive grids */
+    .grid-season   { grid-template-columns: 1fr 2fr 2fr; }
+    .grid-compare  { grid-template-columns: 3fr 2fr; }
+    .grid-two-col  { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
+
+    @media (max-width: 720px) {
+      .grid-season, .grid-compare { grid-template-columns: 1fr; }
+    }
   </style>
 </head>
 <body>
@@ -164,7 +173,7 @@ function SeasonOverview() {
   const first = EVENTS[0].drivers, last = EVENTS[EVENTS.length-1].drivers;
   const growth = ((last-first)/first*100).toFixed(0);
   return (
-    <div style={{display:"grid",gap:16,gridTemplateColumns:"1fr 2fr 2fr"}}>
+    <div className="grid-season" style={{display:"grid",gap:16}}>
       <Card>
         <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:16}}>
           <div style={{width:40,height:40,borderRadius:10,background:`linear-gradient(135deg,${t.accent},${t.accentDim})`,
@@ -371,7 +380,7 @@ function CategoryBreakdown() {
     const dim = anyHover && !isHovered;
     const base = series === "e1" ? t.blue : t.accent;
     return {
-      width:"40%", maxWidth:24, height:h, background:base,
+      width:"42%", height:h, background:base,
       borderRadius:"3px 3px 0 0",
       opacity: series === "e1" ? (dim ? 0.25 : (isHovered ? 1 : 0.7)) : (dim ? 0.35 : 1),
       transform: isHovered ? "scaleY(1.03)" : "scaleY(1)",
@@ -381,19 +390,21 @@ function CategoryBreakdown() {
     };
   };
 
+  const BAR_AREA = 280; // px — bar columns; label area below is separate
+
   return (
     <Card>
       <SectionTitle sub="Driver distribution by category across events">Category Breakdown</SectionTitle>
       <div style={{position:"relative"}}>
-        <div style={{display:"flex",gap:6,alignItems:"flex-end",height:220,padding:"0 4px"}}
+        <div style={{display:"flex",gap:4,alignItems:"flex-end",height:BAR_AREA + 36,padding:"0 4px"}}
           onMouseLeave={()=>setHover(null)}>
           {chartData.map((d,i) => {
-            const h1 = (d.e1/maxVal)*180;
-            const h2 = (d.e2/maxVal)*180;
+            const h1 = (d.e1/maxVal) * BAR_AREA;
+            const h2 = (d.e2/maxVal) * BAR_AREA;
             const catHovered = hover && hover.i === i;
             return (
               <div key={i} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2,minWidth:0}}>
-                <div style={{display:"flex",gap:2,alignItems:"flex-end",width:"100%",justifyContent:"center",height:180}}>
+                <div style={{display:"flex",gap:2,alignItems:"flex-end",width:"100%",justifyContent:"center",height:BAR_AREA}}>
                   <div style={barStyle("e1", i, h1)}
                     onMouseEnter={()=>setHover({i, series:"e1"})} />
                   <div style={barStyle("e2", i, h2)}
@@ -492,7 +503,7 @@ function EventComparison() {
   return (
     <Card>
       <SectionTitle sub="Side-by-side event metrics — hover a row for delta">Event Comparison</SectionTitle>
-      <div style={{display:"grid",gridTemplateColumns:"1fr auto 1fr",gap:0,alignItems:"center"}}>
+      <div style={{display:"grid",gridTemplateColumns:"1fr minmax(90px,auto) 1fr",gap:0,alignItems:"center"}}>
         <div style={{textAlign:"center",fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,
           fontSize:13,color:t.blue,textTransform:"uppercase",letterSpacing:"0.08em",paddingBottom:10}}>{e1.subtitle}</div>
         <div />
@@ -515,7 +526,7 @@ function EventComparison() {
                 background:rowBg,borderRadius:"6px 0 0 6px",transition:"background 0.15s",cursor:"default"}}>
               <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:16,
                 color:!e2better?t.text:t.textMuted,minWidth:40,textAlign:"right"}}>{m.e1}</span>
-              <div style={{width:"clamp(60px,10vw,140px)",height:6,background:t.subtleBg2,borderRadius:3,overflow:"hidden",direction:"rtl"}}>
+              <div style={{flex:1,height:6,background:t.subtleBg2,borderRadius:3,overflow:"hidden",direction:"rtl"}}>
                 <div style={{width:`${e1w}%`,height:"100%",background:t.blue,borderRadius:3,
                   transition:"width 0.3s"}} />
               </div>
@@ -533,7 +544,7 @@ function EventComparison() {
             <div key={`e2-${i}`} onMouseEnter={onEnter} onMouseLeave={onLeave}
               style={{display:"flex",alignItems:"center",gap:8,padding:"6px 8px",background:rowBg,
                 borderRadius:"0 6px 6px 0",transition:"background 0.15s",cursor:"default"}}>
-              <div style={{width:"clamp(60px,10vw,140px)",height:6,background:t.subtleBg2,borderRadius:3,overflow:"hidden"}}>
+              <div style={{flex:1,height:6,background:t.subtleBg2,borderRadius:3,overflow:"hidden"}}>
                 <div style={{width:`${e2w}%`,height:"100%",background:t.accent,borderRadius:3,
                   transition:"width 0.3s"}} />
               </div>
@@ -703,7 +714,7 @@ function NHSCCDashboard() {
         {activeTab === "overview" && (
           <div style={{display:"flex",flexDirection:"column",gap:16}}>
             <SeasonOverview />
-            <div style={{display:"grid",gap:16,gridTemplateColumns:"minmax(300px,3fr) minmax(260px,2fr)"}}>
+            <div className="grid-compare" style={{display:"grid",gap:16}}>
               <EventComparison />
               <RetentionWidget />
             </div>
