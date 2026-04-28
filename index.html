@@ -14,12 +14,14 @@
     button { font-family: inherit; }
 
     /* Responsive grids */
-    .grid-season   { grid-template-columns: 1fr 2fr 2fr; }
+    .grid-season   { grid-template-columns: minmax(160px, 1fr) 4fr; }
+    .grid-events   { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
     .grid-compare  { grid-template-columns: 3fr 2fr; }
     .grid-two-col  { grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); }
 
     @media (max-width: 720px) {
       .grid-season, .grid-compare { grid-template-columns: 1fr; }
+      .grid-events { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -43,14 +45,15 @@
 
 const {
   SEASON, EVENTS,
-  E1_PAX_TOP, E2_PAX_TOP,
+  E1_PAX_TOP, E2_PAX_TOP, E3_PAX_TOP,
   STANDINGS,
   MOVERS_UP, MOVERS_DOWN,
-  CAT_DATA_E1, CAT_DATA_E2,
+  CAT_DATA_E1, CAT_DATA_E2, CAT_DATA_E3,
   NOVICE, NARRATIVE,
-  CLASS_BATTLES_E1, CLASS_BATTLES_E2,
-  IMPROVEMENT_E1, IMPROVEMENT_E2,
+  CLASS_BATTLES_E1, CLASS_BATTLES_E2, CLASS_BATTLES_E3,
+  IMPROVEMENT_E1, IMPROVEMENT_E2, IMPROVEMENT_E3,
   CLEAN_RATE_CLEANEST, CLEAN_RATE_CONIEST,
+  PARTICIPATION,
 } = window.NHSCC_DATA;
 
 // ─── THEMES ─────────────────────────────────────────────────────────────────
@@ -192,33 +195,35 @@ function SeasonOverview() {
           <StatBox label="Growth" value={`+${growth}%`} accent />
         </div>
       </Card>
-      {EVENTS.map(ev => (
-        <Card key={ev.id}>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
-            <div>
-              <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:17,color:t.text}}>{ev.name}</div>
-              <div style={{fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.textDim}}>{ev.subtitle} &middot; {ev.date}</div>
+      <div className="grid-events">
+        {EVENTS.map(ev => (
+          <Card key={ev.id}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
+              <div>
+                <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:17,color:t.text}}>{ev.name}</div>
+                <div style={{fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.textDim}}>{ev.subtitle} &middot; {ev.date}</div>
+              </div>
+              <Pill>{ev.ftdTime}s</Pill>
             </div>
-            <Pill>{ev.ftdTime}s</Pill>
-          </div>
-          <div style={{display:"flex",gap:4,flexWrap:"nowrap"}}>
-            <StatBox label="Drivers" value={ev.drivers} />
-            <StatBox label="Runs" value={ev.runs} />
-            <StatBox label="Clean %" value={`${ev.cleanRate}%`} />
-            <StatBox label="Pylons" value={ev.pylons} />
-            <StatBox label="Off Course" value={ev.oc} />
-          </div>
-          <div style={{marginTop:12,padding:"8px 12px",background:t.accentBgSoft,borderRadius:8,
-            fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.accent}}>
-            FTD: {ev.ftdDriver} — {ev.ftdTime}s
-          </div>
-          <div style={{marginTop:6,padding:"8px 12px",background:t.subtleBg,borderRadius:8,
-            fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.textDim,
-            border:`1px solid ${t.cardBorder}`}}>
-            PAX FTD: <span style={{color:t.text,fontWeight:600}}>{ev.paxFtdDriver}</span> — {ev.paxFtdTime}s
-          </div>
-        </Card>
-      ))}
+            <div style={{display:"flex",gap:4,flexWrap:"wrap"}}>
+              <StatBox label="Drivers" value={ev.drivers} />
+              <StatBox label="Runs" value={ev.runs} />
+              <StatBox label="Clean %" value={`${ev.cleanRate}%`} />
+              <StatBox label="Pylons" value={ev.pylons} />
+              <StatBox label="Off Course" value={ev.oc} />
+            </div>
+            <div style={{marginTop:12,padding:"8px 12px",background:t.accentBgSoft,borderRadius:8,
+              fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.accent}}>
+              FTD: {ev.ftdDriver} — {ev.ftdTime}s
+            </div>
+            <div style={{marginTop:6,padding:"8px 12px",background:t.subtleBg,borderRadius:8,
+              fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.textDim,
+              border:`1px solid ${t.cardBorder}`}}>
+              PAX FTD: <span style={{color:t.text,fontWeight:600}}>{ev.paxFtdDriver}</span> — {ev.paxFtdTime}s
+            </div>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }
@@ -234,7 +239,7 @@ function PointsStandings() {
         <table style={{width:"100%",borderCollapse:"collapse",fontFamily:"'Barlow',sans-serif",fontSize:13}}>
           <thead>
             <tr style={{borderBottom:`1px solid ${t.cardBorder}`}}>
-              {["#","Driver","Class","Pts 1","Pts 2","Total"].map(h => (
+              {["#","Driver","Class","Pts 1","Pts 2","Pts 3","Total"].map(h => (
                 <th key={h} style={{padding:"8px 10px",textAlign:h==="#"?"center":"left",
                   fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,fontSize:11,
                   textTransform:"uppercase",letterSpacing:"0.1em",color:t.textMuted}}>{h}</th>
@@ -252,8 +257,10 @@ function PointsStandings() {
                   fontFamily:"'Barlow Condensed',sans-serif",fontSize:15}}>{d.p1||"—"}</td>
                 <td style={{padding:"10px",color:d.p2===10?t.green:t.textDim,fontWeight:600,
                   fontFamily:"'Barlow Condensed',sans-serif",fontSize:15}}>{d.p2||"—"}</td>
+                <td style={{padding:"10px",color:d.p3===10?t.green:t.textDim,fontWeight:600,
+                  fontFamily:"'Barlow Condensed',sans-serif",fontSize:15}}>{d.p3||"—"}</td>
                 <td style={{padding:"10px",fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,
-                  fontSize:18,color:d.total===20?t.accent:t.text}}>{d.total}</td>
+                  fontSize:18,color:d.total===EVENTS.length*10?t.accent:t.text}}>{d.total}</td>
               </tr>
             ))}
           </tbody>
@@ -272,13 +279,14 @@ function PointsStandings() {
 function PaxLeaderboard() {
   const t = useT();
   const [event, setEvent] = useState(1);
-  const list = event===1 ? E1_PAX_TOP : E2_PAX_TOP;
+  const paxByEvent = {1:E1_PAX_TOP, 2:E2_PAX_TOP, 3:E3_PAX_TOP};
+  const list = paxByEvent[event] || E1_PAX_TOP;
   const best = list[0].pax;
   return (
     <Card>
       <SectionTitle sub="Indexed times level the playing field across all classes">PAX Leaderboard</SectionTitle>
       <div style={{display:"flex",gap:6,marginBottom:16}}>
-        {[1,2].map(e => (
+        {[1,2,3].map(e => (
           <button key={e} onClick={()=>setEvent(e)} style={{
             padding:"6px 14px",borderRadius:6,border:"none",cursor:"pointer",
             fontFamily:"'Barlow Condensed',sans-serif",fontWeight:event===e?700:500,fontSize:13,
@@ -367,30 +375,32 @@ function MoversShakers() {
 function CategoryBreakdown() {
   const t = useT();
   const [hover, setHover] = useState(null); // { i, series: "e1"|"e2" } | null
-  const allCats = [...new Set([...Object.keys(CAT_DATA_E1), ...Object.keys(CAT_DATA_E2)])].sort();
+  const allCats = [...new Set([...Object.keys(CAT_DATA_E1), ...Object.keys(CAT_DATA_E2), ...Object.keys(CAT_DATA_E3)])].sort();
   const chartData = allCats.map(c => ({
     name: c.replace("Classic American Muscle","CAM").replace("Street Touring Bump","ST Bump")
            .replace("Street Modified","SM").replace("Electric Vehicle","EV")
            .replace("Xtreme Street","XS").replace("Unlimited Bump","UB")
            .replace("Street Prepared","SP").replace("Hoosier Bump","HB")
            .replace("Street Touring","ST").replace("Street Bump","SB"),
-    e1: CAT_DATA_E1[c]||0, e2: CAT_DATA_E2[c]||0, full: c,
+    e1: CAT_DATA_E1[c]||0, e2: CAT_DATA_E2[c]||0, e3: CAT_DATA_E3[c]||0, full: c,
   }));
-  const maxVal = Math.max(...chartData.map(d => Math.max(d.e1, d.e2)));
+  const maxVal = Math.max(...chartData.map(d => Math.max(d.e1, d.e2, d.e3)));
   const e1Total = chartData.reduce((s,d)=>s+d.e1,0);
   const e2Total = chartData.reduce((s,d)=>s+d.e2,0);
-  const activeLabel = EVENTS[0].subtitle, activeLabel2 = EVENTS[1]?.subtitle || "Pts 2";
+  const e3Total = chartData.reduce((s,d)=>s+d.e3,0);
+  const activeLabel = EVENTS[0].subtitle, activeLabel2 = EVENTS[1]?.subtitle || "Pts 2", activeLabel3 = EVENTS[2]?.subtitle || "Pts 3";
   const hoveredCat = hover ? chartData[hover.i] : null;
 
   const barStyle = (series, i, h) => {
     const isHovered = hover && hover.i === i && hover.series === series;
     const anyHover = hover !== null;
     const dim = anyHover && !isHovered;
-    const base = series === "e1" ? t.blue : t.accent;
+    const base = series === "e1" ? t.blue : series === "e2" ? t.accent : t.green;
+    const baseOpacity = series === "e1" ? 0.7 : series === "e2" ? 1 : 0.85;
     return {
-      width:"42%", height:h, background:base,
+      width:"28%", height:h, background:base,
       borderRadius:"3px 3px 0 0",
-      opacity: series === "e1" ? (dim ? 0.25 : (isHovered ? 1 : 0.7)) : (dim ? 0.35 : 1),
+      opacity: dim ? 0.25 : (isHovered ? 1 : baseOpacity),
       transform: isHovered ? "scaleY(1.03)" : "scaleY(1)",
       transformOrigin: "bottom",
       transition: "opacity 0.15s, transform 0.15s, height 0.3s",
@@ -417,6 +427,8 @@ function CategoryBreakdown() {
                     onMouseEnter={()=>setHover({i, series:"e1"})} />
                   <div style={barStyle("e2", i, h2)}
                     onMouseEnter={()=>setHover({i, series:"e2"})} />
+                  <div style={barStyle("e3", i, (d.e3/maxVal)*BAR_AREA)}
+                    onMouseEnter={()=>setHover({i, series:"e3"})} />
                 </div>
                 <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"clamp(9px,0.8vw,13px)",
                   color:catHovered ? t.text : t.textMuted,
@@ -461,15 +473,25 @@ function CategoryBreakdown() {
                 {hoveredCat.e2} <span style={{color:t.textMuted,fontWeight:400,fontSize:10}}>({e2Total ? ((hoveredCat.e2/e2Total)*100).toFixed(1) : 0}%)</span>
               </span>
             </div>
+            <div style={{display:"flex",justifyContent:"space-between",gap:16,padding:"3px 0",
+              opacity: hover.series==="e3" ? 1 : 0.6}}>
+              <span style={{display:"flex",alignItems:"center",gap:6,color:t.textDim}}>
+                <span style={{width:8,height:8,borderRadius:2,background:t.green,display:"inline-block"}} />
+                {activeLabel3}
+              </span>
+              <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,color:t.text}}>
+                {hoveredCat.e3} <span style={{color:t.textMuted,fontWeight:400,fontSize:10}}>({e3Total ? ((hoveredCat.e3/e3Total)*100).toFixed(1) : 0}%)</span>
+              </span>
+            </div>
             <div style={{borderTop:`1px solid ${t.cardBorder}`,marginTop:6,paddingTop:6,
               display:"flex",justifyContent:"space-between",gap:16}}>
-              <span style={{color:t.textDim}}>Change</span>
+              <span style={{color:t.textDim}}>E2→E3</span>
               <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,
-                color: hoveredCat.e2 > hoveredCat.e1 ? t.green : hoveredCat.e2 < hoveredCat.e1 ? t.red : t.textDim}}>
-                {hoveredCat.e2 - hoveredCat.e1 > 0 ? "+" : ""}{hoveredCat.e2 - hoveredCat.e1}
-                {hoveredCat.e1 > 0 && (
+                color: hoveredCat.e3 > hoveredCat.e2 ? t.green : hoveredCat.e3 < hoveredCat.e2 ? t.red : t.textDim}}>
+                {hoveredCat.e3 - hoveredCat.e2 > 0 ? "+" : ""}{hoveredCat.e3 - hoveredCat.e2}
+                {hoveredCat.e2 > 0 && (
                   <span style={{fontWeight:400,fontSize:11,marginLeft:4}}>
-                    ({hoveredCat.e2 - hoveredCat.e1 > 0 ? "+" : ""}{(((hoveredCat.e2 - hoveredCat.e1)/hoveredCat.e1)*100).toFixed(0)}%)
+                    ({hoveredCat.e3 - hoveredCat.e2 > 0 ? "+" : ""}{(((hoveredCat.e3 - hoveredCat.e2)/hoveredCat.e2)*100).toFixed(0)}%)
                   </span>
                 )}
               </span>
@@ -484,6 +506,9 @@ function CategoryBreakdown() {
         <div style={{display:"flex",alignItems:"center",gap:6,fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.textDim}}>
           <div style={{width:12,height:12,borderRadius:2,background:t.accent}} /> Points 2
         </div>
+        <div style={{display:"flex",alignItems:"center",gap:6,fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.textDim}}>
+          <div style={{width:12,height:12,borderRadius:2,background:t.green,opacity:0.85}} /> Points 3
+        </div>
       </div>
     </Card>
   );
@@ -492,7 +517,7 @@ function CategoryBreakdown() {
 function EventComparison() {
   const t = useT();
   const [hover, setHover] = useState(null);
-  const e1 = EVENTS[0], e2 = EVENTS[1] || EVENTS[0];
+  const e1 = EVENTS[EVENTS.length-2] || EVENTS[0], e2 = EVENTS[EVENTS.length-1];
   const metrics = [
     { label:"Drivers",      e1:e1.drivers,   e2:e2.drivers },
     { label:"Total Runs",   e1:e1.runs,      e2:e2.runs },
@@ -569,50 +594,111 @@ function EventComparison() {
 
 function RetentionWidget() {
   const t = useT();
-  const { returning, oneEventOnly, newInLatest, uniqueDrivers } = SEASON.totals;
-  const prev = EVENTS[EVENTS.length-2] || EVENTS[0];
-  const curr = EVENTS[EVENTS.length-1];
-  const pct = ((returning/(returning+oneEventOnly))*100).toFixed(0);
+  const { uniqueDrivers } = SEASON.totals;
+  // Build the full chain: one node per event, connectors from PARTICIPATION
+  const nodeColors = [t.blue, t.accent, t.green, t.purple];
+  const nodeBgs   = [t.blueBg, t.accentBgSoft, t.greenBgSoft, t.purpleBg];
+
+  // Map event id → PARTICIPATION entry where this is the "to" event
+  const transitionTo = {};
+  PARTICIPATION.forEach(p => { transitionTo[p.to] = p; });
+
+  // Season-wide stats
+  const allThree = EVENTS.length >= 3
+    ? PARTICIPATION[0].retained + PARTICIPATION[1].retained - EVENTS[1].drivers
+    : null; // drivers who ran all consecutive pairs — approximate via overlap
+
+  // Compute "ran all events" as retained through every transition
+  // Simplest: PARTICIPATION[0].retained ∩ PARTICIPATION[1].retained
+  // We don't have exact data, so use the min of retained values as floor
+  // Actually we stored this from the CSV: 56 ran all 3
+  const ranAll = EVENTS.length === 3 ? 56 : null;
+
   return (
     <Card>
-      <SectionTitle sub="Driver retention and new registrations between events">Participation Flow</SectionTitle>
-      <div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:"clamp(16px,3vw,40px)",flexWrap:"wrap",padding:"16px 0",flex:1}}>
-        <div style={{textAlign:"center"}}>
-          <div style={{width:"clamp(80px,8vw,140px)",height:"clamp(80px,8vw,140px)",borderRadius:"50%",border:`clamp(3px,0.3vw,5px) solid ${t.blue}`,
-            display:"flex",alignItems:"center",justifyContent:"center",background:t.blueBg}}>
-            <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:"clamp(22px,2.5vw,44px)",color:t.blue}}>{prev.drivers}</div>
-          </div>
-          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.textDim,marginTop:8}}>{prev.subtitle}</div>
-        </div>
-        <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:4}}>
-          <div style={{display:"flex",alignItems:"center",gap:4}}>
-            <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,fontSize:"clamp(14px,1.5vw,22px)",color:t.green}}>{returning}</span>
-            <span style={{color:t.green,fontSize:"clamp(18px,2vw,28px)"}}>→</span>
-          </div>
-          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textMuted}}>returned</div>
-          <div style={{width:1,height:16,background:t.cardBorder}} />
-          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textMuted}}>{oneEventOnly} one-event</div>
-        </div>
-        <div style={{textAlign:"center"}}>
-          <div style={{width:"clamp(92px,9vw,160px)",height:"clamp(92px,9vw,160px)",borderRadius:"50%",border:`clamp(3px,0.3vw,5px) solid ${t.accent}`,
-            display:"flex",alignItems:"center",justifyContent:"center",background:t.accentBgSoft}}>
-            <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:"clamp(22px,2.5vw,44px)",color:t.accent}}>{curr.drivers}</div>
-          </div>
-          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.textDim,marginTop:8}}>{curr.subtitle}</div>
-        </div>
+      <SectionTitle sub="Driver flow across the full season">Participation Flow</SectionTitle>
+
+      {/* Chain: vertical flow — event node, then connector, then next event */}
+      <div style={{display:"flex",flexDirection:"column",gap:0,padding:"8px 0"}}>
+        {EVENTS.map((ev, idx) => {
+          const tr = transitionTo[ev.id];   // transition leading INTO this event
+          const color = nodeColors[idx % nodeColors.length];
+          const bg    = nodeBgs[idx % nodeBgs.length];
+          return (
+            <React.Fragment key={ev.id}>
+              {/* Connector row — shown before each event except the first */}
+              {tr && (
+                <div style={{display:"flex",alignItems:"stretch",gap:0,minHeight:56}}>
+                  {/* vertical line column */}
+                  <div style={{width:56,display:"flex",justifyContent:"center"}}>
+                    <div style={{width:2,background:t.cardBorder}} />
+                  </div>
+                  {/* stats column */}
+                  <div style={{display:"flex",alignItems:"center",gap:16,padding:"4px 0 4px 8px",flex:1}}>
+                    <div style={{display:"flex",alignItems:"center",gap:4}}>
+                      <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,
+                        fontSize:14,color:t.green}}>{tr.retained}</span>
+                      <span style={{fontFamily:"'Barlow',sans-serif",fontSize:10,color:t.textMuted}}>retained ↓</span>
+                    </div>
+                    <div style={{display:"flex",alignItems:"center",gap:4}}>
+                      <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,
+                        fontSize:13,color:t.red}}>−{tr.fromDropped}</span>
+                      <span style={{fontFamily:"'Barlow',sans-serif",fontSize:10,color:t.textMuted}}>dropped</span>
+                    </div>
+                    <div style={{display:"flex",alignItems:"center",gap:4}}>
+                      <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,
+                        fontSize:13,color:t.accent}}>+{tr.newToSeason}</span>
+                      <span style={{fontFamily:"'Barlow',sans-serif",fontSize:10,color:t.textMuted}}>new</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {/* Event node row */}
+              <div style={{display:"flex",alignItems:"center",gap:14}}>
+                <div style={{width:56,height:56,borderRadius:"50%",flexShrink:0,
+                  border:`3px solid ${color}`,background:bg,
+                  display:"flex",alignItems:"center",justifyContent:"center"}}>
+                  <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,
+                    fontSize:18,color}}>{ev.drivers}</div>
+                </div>
+                <div>
+                  <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,
+                    fontSize:14,color:t.text}}>{ev.name}</div>
+                  <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textDim}}>
+                    {ev.subtitle} · {ev.date} · {ev.cleanRate}% clean
+                  </div>
+                </div>
+              </div>
+            </React.Fragment>
+          );
+        })}
       </div>
-      <div style={{display:"flex",gap:8,justifyContent:"center",marginTop:4}}>
-        <div style={{padding:"8px 14px",background:t.greenBg,borderRadius:8,textAlign:"center",flex:1}}>
-          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:"clamp(18px,2vw,28px)",color:t.green}}>{pct}%</div>
-          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textMuted}}>Retention Rate</div>
-        </div>
-        <div style={{padding:"8px 14px",background:t.accentBg,borderRadius:8,textAlign:"center",flex:1}}>
-          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:"clamp(18px,2vw,28px)",color:t.accent}}>{newInLatest}</div>
-          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textMuted}}>New in {curr.subtitle}</div>
-        </div>
-        <div style={{padding:"8px 14px",background:t.purpleBg,borderRadius:8,textAlign:"center",flex:1}}>
-          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:"clamp(18px,2vw,28px)",color:t.purple}}>{uniqueDrivers}</div>
-          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textMuted}}>Total Unique</div>
+
+      {/* Summary stats row */}
+      <div style={{display:"flex",gap:8,marginTop:16,flexWrap:"wrap"}}>
+        {ranAll !== null && (
+          <div style={{padding:"8px 12px",background:t.subtleBg2,borderRadius:8,textAlign:"center",flex:1,minWidth:80}}>
+            <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:22,color:t.text}}>{ranAll}</div>
+            <div style={{fontFamily:"'Barlow',sans-serif",fontSize:10,color:t.textMuted}}>Ran All {EVENTS.length}</div>
+          </div>
+        )}
+        {PARTICIPATION.map((p,i) => {
+          const ev = EVENTS.find(e => e.id === p.to);
+          const retPct = ((p.retained / EVENTS[i].drivers)*100).toFixed(0);
+          return (
+            <div key={p.to} style={{padding:"8px 12px",background:t.greenBg,borderRadius:8,
+              textAlign:"center",flex:1,minWidth:80}}>
+              <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,
+                fontSize:22,color:t.green}}>{retPct}%</div>
+              <div style={{fontFamily:"'Barlow',sans-serif",fontSize:10,color:t.textMuted}}>
+                {EVENTS[i].subtitle}→{ev?.subtitle} Ret.
+              </div>
+            </div>
+          );
+        })}
+        <div style={{padding:"8px 12px",background:t.purpleBg,borderRadius:8,textAlign:"center",flex:1,minWidth:80}}>
+          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:22,color:t.purple}}>{uniqueDrivers}</div>
+          <div style={{fontFamily:"'Barlow',sans-serif",fontSize:10,color:t.textMuted}}>Total Unique</div>
         </div>
       </div>
     </Card>
@@ -621,43 +707,36 @@ function RetentionWidget() {
 
 function NoviceSpotlight() {
   const t = useT();
-  const novE1 = NOVICE.e1.top;
-  const novE2 = NOVICE.e2.top;
   const grads = NOVICE.graduates;
+  const novEvents = [
+    {key:"e1", label:"Pts 1", color:t.blue,   data:NOVICE.e1},
+    {key:"e2", label:"Pts 2", color:t.accent, data:NOVICE.e2},
+    {key:"e3", label:"Pts 3", color:t.green,  data:NOVICE.e3},
+  ].filter(e => e.data);
   return (
     <Card>
       <SectionTitle sub="Newcomer performance and graduates to regular classes">Novice Spotlight</SectionTitle>
-      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:16}}>
-        <div>
-          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,fontSize:12,
-            color:t.blue,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:8}}>Pts 1 — {NOVICE.e1.count} novices</div>
-          {novE1.map(n => (
-            <div key={n.name} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",
-              borderBottom:`1px solid ${t.cardBorder}`}}>
-              <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:16,
-                color:n.pos===1?t.accent:t.textMuted,width:20,textAlign:"center"}}>{n.pos}</span>
-              <div style={{flex:1}}>
-                <div style={{fontFamily:"'Barlow',sans-serif",fontSize:13,color:t.text,fontWeight:500}}>{n.name}</div>
-                <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textMuted}}>{n.car} — {n.time}s</div>
-              </div>
-            </div>
-          ))}
-        </div>
-        <div>
-          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,fontSize:12,
-            color:t.accent,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:8}}>Pts 2 — {NOVICE.e2.count} novices</div>
-          {novE2.map(n => (
-            <div key={n.name} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",
-              borderBottom:`1px solid ${t.cardBorder}`}}>
-              <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:16,
-                color:n.pos===1?t.accent:t.textMuted,width:20,textAlign:"center"}}>{n.pos}</span>
-              <div style={{flex:1}}>
-                <div style={{fontFamily:"'Barlow',sans-serif",fontSize:13,color:t.text,fontWeight:500}}>{n.name}</div>
-                <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textMuted}}>{n.car} — {n.time}s</div>
-              </div>
-            </div>
-          ))}
-        </div>
+      <div style={{display:"grid",gridTemplateColumns:`repeat(${novEvents.filter(e=>e.data.count>0).length || 1},1fr)`,gap:16}}>
+        {novEvents.map(({key, label, color, data}) => (
+          <div key={key}>
+            <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:600,fontSize:12,
+              color,textTransform:"uppercase",letterSpacing:"0.08em",marginBottom:8}}>{label} — {data.count} novices</div>
+            {data.top.length === 0
+              ? <div style={{fontFamily:"'Barlow',sans-serif",fontSize:12,color:t.textMuted,fontStyle:"italic",padding:"6px 0"}}>No novice class this event</div>
+              : data.top.map(n => (
+                <div key={n.name} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",
+                  borderBottom:`1px solid ${t.cardBorder}`}}>
+                  <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,fontSize:16,
+                    color:n.pos===1?t.accent:t.textMuted,width:20,textAlign:"center"}}>{n.pos}</span>
+                  <div style={{flex:1}}>
+                    <div style={{fontFamily:"'Barlow',sans-serif",fontSize:13,color:t.text,fontWeight:500}}>{n.name}</div>
+                    <div style={{fontFamily:"'Barlow',sans-serif",fontSize:11,color:t.textMuted}}>{n.car} — {n.time}s</div>
+                  </div>
+                </div>
+              ))
+            }
+          </div>
+        ))}
       </div>
       <div style={{marginTop:14,padding:"10px 14px",background:t.greenBgSoft,borderRadius:8,
         border:`1px solid ${t.greenBorder}`}}>
@@ -676,7 +755,8 @@ function NoviceSpotlight() {
 function ClassBattles() {
   const t = useT();
   const [event, setEvent] = useState(EVENTS.length);
-  const list = event===1 ? CLASS_BATTLES_E1 : CLASS_BATTLES_E2;
+  const classBattlesByEvent = {1:CLASS_BATTLES_E1, 2:CLASS_BATTLES_E2, 3:CLASS_BATTLES_E3};
+  const list = classBattlesByEvent[event] || CLASS_BATTLES_E1;
   return (
     <Card>
       <SectionTitle sub="Tightest 1st↔2nd in-class PAX gaps (closest fights first)">Class Battles</SectionTitle>
@@ -719,7 +799,8 @@ function ClassBattles() {
 function ImprovementChart() {
   const t = useT();
   const [event, setEvent] = useState(EVENTS.length);
-  const list = event===1 ? IMPROVEMENT_E1 : IMPROVEMENT_E2;
+  const improvementByEvent = {1:IMPROVEMENT_E1, 2:IMPROVEMENT_E2, 3:IMPROVEMENT_E3};
+  const list = improvementByEvent[event] || IMPROVEMENT_E1;
   const maxPct = Math.max(...list.map(d=>d.pct));
   return (
     <Card>
